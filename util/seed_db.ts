@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import bcrypt from "bcrypt";
 import { db, VercelPoolClient } from "@vercel/postgres";
+import { NextResponse } from "next/server";
 
 import { users } from "../types/seed-data";
 
@@ -119,11 +120,11 @@ export async function GET() {
     // await seedRevenue();
     await client.sql`COMMIT`;
 
-    return Response.json({ message: `Created Users:\n${createdUsers[0].rows.map((res) => res)}` });
+    return NextResponse.json({ message: `Created Users:\n${createdUsers[0].rows.map((res) => res)}` });
   } catch (error) {
     await client.sql`ROLLBACK`;
 
-    return Response.json({ error }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   }
 
 }
