@@ -28,15 +28,6 @@ export const users = [
     active: true,
   },
   {
-    firstName: "James",
-    lastName: "Novello",
-    email: "james.novello@mail.com",
-    password: "password",
-    role: "user",
-    avatar: "/avatars/user4.png",
-    active: true,
-  },
-  {
     firstName: "Peter",
     lastName: "Parker",
     email: "peter.parker@mail.com",
