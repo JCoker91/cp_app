@@ -1,9 +1,9 @@
 /* eslint-disable prettier/prettier */
 import bcrypt from "bcrypt";
-import { db, VercelPoolClient } from "@vercel/postgres";
+import { db } from "@vercel/postgres";
 import { NextResponse } from "next/server";
 
-import { users } from "../../types/seed-data";
+import { users, subjects, classes, evaluations } from "../../types/seed-data";
 
 const client = await db.connect();
 
@@ -30,8 +30,8 @@ async function seedUsers() {
       const hashedPassword = await bcrypt.hash(user.password, 10);
 
       return client.sql`
-        INSERT INTO users (first_name, last_name, email, password, avatar, is_admin)
-        VALUES (${user.firstName}, ${user.lastName}, ${user.email}, ${hashedPassword}, ${user.avatar}, ${user.role === "admin"})
+        INSERT INTO users (id, first_name, last_name, email, password, avatar, is_admin)
+        VALUES (${user.id}, ${user.firstName}, ${user.lastName}, ${user.email}, ${hashedPassword}, ${user.avatar}, ${user.role === "admin"})
         RETURNING id, email;
       `;
     }),
@@ -40,85 +40,103 @@ async function seedUsers() {
   return insertedUsers;
 }
 
-// async function seedInvoices() {
-//   await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
-//   await client.sql`
-//     CREATE TABLE IF NOT EXISTS invoices (
-//       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-//       customer_id UUID NOT NULL,
-//       amount INT NOT NULL,
-//       status VARCHAR(255) NOT NULL,
-//       date DATE NOT NULL
-//     );
-//   `;
+async function seedSubjects() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
-//   const insertedInvoices = await Promise.all(
-//     invoices.map(
-//       (invoice) => client.sql`
-//         INSERT INTO invoices (customer_id, amount, status, date)
-//         VALUES (${invoice.customer_id}, ${invoice.amount}, ${invoice.status}, ${invoice.date})
-//         ON CONFLICT (id) DO NOTHING;
-//       `,
-//     ),
-//   );
+  await client.sql`DROP TABLE IF EXISTS subjects`;
 
-//   return insertedInvoices;
-// }
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS subjects (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
 
-// async function seedCustomers() {
-//   await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  const insertedSubjects = await Promise.all(
+    subjects.map(
+      (subject) => client.sql`
+        INSERT INTO subjects (id, name)
+        VALUES (${subject.id}, ${subject.name})
+        RETURNING id, name;
+      `,
+    ),
+  );
+  return insertedSubjects;
+}
 
-//   await client.sql`
-//     CREATE TABLE IF NOT EXISTS customers (
-//       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-//       name VARCHAR(255) NOT NULL,
-//       email VARCHAR(255) NOT NULL,
-//       image_url VARCHAR(255) NOT NULL
-//     );
-//   `;
+async function seedClasses() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
-//   const insertedCustomers = await Promise.all(
-//     customers.map(
-//       (customer) => client.sql`
-//         INSERT INTO customers (id, name, email, image_url)
-//         VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
-//         ON CONFLICT (id) DO NOTHING;
-//       `,
-//     ),
-//   );
+  await client.sql`DROP TABLE IF EXISTS classes`;
 
-//   return insertedCustomers;
-// }
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS classes (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      primary_teacher_id UUID NOT NULL,
+      secondary_teacher_ids UUID[] NULL,
+      grade VARCHAR(255) NOT NULL,
+      subject_id UUID NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
 
-// async function seedRevenue() {
-//   await client.sql`
-//     CREATE TABLE IF NOT EXISTS revenue (
-//       month VARCHAR(4) NOT NULL UNIQUE,
-//       revenue INT NOT NULL
-//     );
-//   `;
+  const insertedClasses = await Promise.all(
+    classes.map(
+      (classData) => client.sql`
+        INSERT INTO classes (id, name, primary_teacher_id, secondary_teacher_ids,grade, subject_id)
+        VALUES (${classData.id}, ${classData.name}, ${classData.primaryTeacherId}, ${"{" + classes[0].secondaryTeacherIds.join(',')  + "}"}, ${classData.grade}, ${classData.subjectId})
+        RETURNING id, name;
+      `,
+    ),
+  );
 
-//   const insertedRevenue = await Promise.all(
-//     revenue.map(
-//       (rev) => client.sql`
-//         INSERT INTO revenue (month, revenue)
-//         VALUES (${rev.month}, ${rev.revenue})
-//         ON CONFLICT (month) DO NOTHING;
-//       `,
-//     ),
-//   );
+  return insertedClasses;
+}
 
-//   return insertedRevenue;
-// }
+async function seedEvaluations() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
+  await client.sql`DROP TABLE IF EXISTS evaluations`;
+
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS evaluations (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      primary_teacher_id UUID NOT NULL,
+      class_id UUID NOT NULL,
+      evaluation_notes TEXT NOT NULL,
+      evaluation_date TIMESTAMP WITH TIME ZONE NOT NULL,
+      evaluator_id UUID NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+    `;
+
+  const insertedEvaluations = await Promise.all(
+    evaluations.map(
+      (evaluation) => client.sql`
+        INSERT INTO evaluations (primary_teacher_id, class_id, evaluation_notes, evaluation_date, evaluator_id)
+        VALUES (${evaluation.primaryTeacherId}, ${evaluation.classId}, ${evaluation.evaluationNotes}, ${evaluation.evaluationDate.toISOString()}, ${evaluation.evaluatorId})
+        RETURNING id, evaluation_notes;
+      `,
+    ),
+  );
+
+  return insertedEvaluations;
+}
 
 export async function GET() {
 
   try {
     await client.sql`BEGIN`;
     let createdUsers = await seedUsers();
-
+    let createdSubjects = await seedSubjects();
+    let createdClasses = await seedClasses();
+    let createdEvaluations = await seedEvaluations();
     // await seedCustomers();
     // await seedInvoices();
     // await seedRevenue();
@@ -126,7 +144,10 @@ export async function GET() {
 
     return NextResponse.json({ 
         message: "Successfully Seeded Database", 
-        created_users : createdUsers.map(user => user.rows[0])
+        created_users : createdUsers.map(user => user.rows[0]),
+        created_subjects: createdSubjects.map(subject => subject.rows[0]),
+        created_classes: createdClasses.map(classData => classData.rows[0]),
+        created_evaluations: createdEvaluations.map(evaluation => evaluation.rows[0])
      });
   } catch (error) {
     await client.sql`ROLLBACK`;
