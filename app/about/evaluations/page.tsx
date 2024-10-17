@@ -564,7 +564,7 @@ export default function EvaluationsPage() {
             )}
           </TableBody>
         </Table>  
-        <Card className="w-full grow">
+        <Card className="grow  min-w-[300px]">
               <CardHeader className="flex gap-3">
               <User
               avatarProps={{radius: "lg", src: evaluations[evalIndex].primaryTeacherAvatar}}
@@ -611,14 +611,15 @@ export default function EvaluationsPage() {
                           {evaluations[evalIndex].status}
                         </Chip>
                       </div>
+                    <Divider/>
                     </div>
                     <div>
                       <div className="flex justify-center">
                         <p className="text-center">Notes</p>
                       </div>
                     </div>
-                    <div className="py-4 overflow-y-auto max-h-[250px]">
-                        <p className="text-center">{evaluations[evalIndex].evaluationNotes}</p>
+                    <div className="overflow-y-auto max-h-[250px]">
+                        <p className="text-start">{evaluations[evalIndex].evaluationNotes}</p>
                     </div>
               </CardBody>
               {/* <CardFooter 
