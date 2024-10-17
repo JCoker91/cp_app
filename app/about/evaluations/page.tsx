@@ -1,7 +1,15 @@
 "use client";
 
+import {Chip, ChipProps} from "@nextui-org/chip";
+import { Evaluation } from "@/types";
 import React from "react";
 import { title } from "@/components/primitives";
+import { Selection, SortDescriptor } from "@nextui-org/react";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/dropdown";
+import { User } from "@nextui-org/user";
+import { Pagination } from "@nextui-org/pagination";
 import {
   Table,
   TableHeader,
@@ -10,53 +18,72 @@ import {
   TableRow,
   TableCell
 } from "@nextui-org/table";
-import { VerticalDotsIcon } from "@/components/icons"; 
+import { VerticalDotsIcon, ChevronDownIcon, SearchIcon, PlusIcon } from "@/components/icons"; 
 
-const statusColorMap = {
+function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+const statusColorMap: Record<string, ChipProps["color"]>= {
   complete: "success",
   pending: "danger",
   scheduled: "warning",
 };
 
 const statusOptions = [
-  {name: "Active", uid: "active"},
-  {name: "Paused", uid: "paused"},
-  {name: "Vacation", uid: "vacation"},
+  {name: "Complete", uid: "complete"},
+  {name: "Pending", uid: "pending"},
+  {name: "Scheduled", uid: "scheduled"},
 ];
 
 const columns = [
   {name: "Teacher", uid: "teacher", sortable: true},
-  {name: "Class", uid: "class", sortable: true},
-  {name: "Date", uid: "date", sortable: true},
-  {name: "Evaluator", uid: "evaluator", sortable: true},
+  {name: "Class", uid: "class"},
+  {name: "Date", uid: "date"},
+  {name: "Evaluator", uid: "evaluator"},
   {name: "Status", uid: "status"},
   {name: "Actions", uid: "actions"},
 ];
 
-const evaluations = [
+const evaluations: Evaluation[] = [
   {
     id: "1",
-    teacher: "John Doe",
-    class: "Math 101",
-    date: new Date(),
-    evaluator: "Jane Doe",
+    primaryTeacherName: "Wade Wilson",
+    primaryTeacherEmail: "wade.wilson@mail.com",
+    primaryTeacherAvatar: "/avatars/wade.wilson.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
     status: "complete",
+    evaluationDate: '2022-12-12',
+    evaluationNotes: "Great teacher, very patient with students.",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
   },
   {
     id: "2",
-    teacher: "Jane Doe",
-    class: "English 101",
-    date: new Date(),
-    evaluator: "John Doe",
+    primaryTeacherName: "Peter Parker",
+    primaryTeacherEmail: "peter.parker@mail.com",
+    primaryTeacherAvatar: "/avatars/peter.parker.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
     status: "pending",
+    evaluationDate: '2022-12-12',
+    evaluationNotes: "Bit Immature.",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
   },
   {
     id: "3",
-    teacher: "John Doe",
-    class: "Math 101",
-    date: new Date(),
-    evaluator: "Jane Doe",
+    primaryTeacherName: "Tony Stark",
+    primaryTeacherEmail: "tony.stark@mail.com",
+    primaryTeacherAvatar: "/avatars/tony.stark.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
     status: "scheduled",
+    evaluationDate: '2022-12-12',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
   },
 ];
 
@@ -64,55 +91,290 @@ const INITIAL_VISIBLE_COLUMNS = ["teacher", "class", "date", "evaluator", "statu
 
 export default function EvaluationsPage() {
   const [filterValue, setFilterValue] = React.useState("");
-  const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
-  const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS));
-  const [statusFilter, setStatusFilter] = React.useState("all");
+  const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
+  const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
+  const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [sortDescriptor, setSortDescriptor] = React.useState({
-    column: "Date",
-    direction: "descending",
+  const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
+    column: "teacher",
+    direction: "ascending",
   });
 
   const [page, setPage] = React.useState(1);
   const hasSearchFilter = Boolean(filterValue);
 
   const headerColumns = React.useMemo(() => {
-      // if (visibleColumns === "all") return columns;
+      if (visibleColumns === "all") return columns;
 
       return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
 
+
     const filteredItems = React.useMemo(() => {
-      let filteredEvaluations = [...evaluations];
+      let filteredUsers = [...evaluations];
   
       if (hasSearchFilter) {
-        filteredEvaluations = filteredEvaluations.filter((evaluation) =>
-          evaluation.teacher.toLowerCase().includes(filterValue.toLowerCase()),
+        filteredUsers = filteredUsers.filter((evaluation) =>
+          evaluation.primaryTeacherName.toLowerCase().includes(filterValue.toLowerCase()),
         );
       }
       if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-        filteredEvaluations = filteredEvaluations.filter((evaluation) =>
-          Array.from(statusFilter).includes(evaluation.status),
+        filteredUsers = filteredUsers.filter((user) =>
+          Array.from(statusFilter).includes(user.status),
         );
       }
   
-      return filteredEvaluations;
+      return filteredUsers;
     }, [evaluations, filterValue, statusFilter]);
 
+    const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
-  return (
-      <Table aria-label="Example static collection table">
-        <TableHeader>
-            <TableColumn>Teacher</TableColumn>
-            <TableColumn>Class</TableColumn>
-            <TableColumn>Date</TableColumn>
-            <TableColumn>Evaluator</TableColumn>
-            <TableColumn>Status</TableColumn>
-            <TableColumn>Actions</TableColumn>
+    const items = React.useMemo(() => {
+      const start = (page - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+  
+      return filteredItems.slice(start, end);
+    }, [page, filteredItems, rowsPerPage]);
+
+    const sortedItems = React.useMemo(() => {
+      return [...items].sort((a: Evaluation, b: Evaluation) => {
+        const first = a[sortDescriptor.column as keyof Evaluation] as unknown as number;
+        const second = b[sortDescriptor.column as keyof Evaluation] as unknown as number;
+        const cmp = first < second ? -1 : first > second ? 1 : 0;
+  
+        return sortDescriptor.direction === "descending" ? -cmp : cmp;
+      });
+    }, [sortDescriptor, items]);
+
+    const renderCell = React.useCallback((evaluation: Evaluation, columnKey: React.Key) => {
+      const cellValue = evaluation[columnKey as keyof Evaluation];
+      switch (columnKey) {
+        case "teacher":
+          return (
+            <User
+              avatarProps={{radius: "lg", src: evaluation.primaryTeacherAvatar}}
+              description={evaluation.primaryTeacherEmail}
+              name={evaluation.primaryTeacherName}
+            >
+              {evaluation.primaryTeacherName}
+            </User>
+          );
+        case "class":
+          return (
+            <div className="flex flex-col">
+              <p className="text-bold text-small capitalize">{cellValue}</p>
+              <p className="text-bold text-tiny capitalize text-default-400">{evaluation.className}</p>
+            </div>
+          );
+        case "date":
+          return (
+            <div className="flex flex-col">
+              <p className="text-bold text-small capitalize">{cellValue}</p>
+              <p className="text-bold text-tiny capitalize text-default-400">{evaluation.evaluationDate}</p>
+            </div>
+          );
+        case "evaluator":
+          return (
+            <div className="flex flex-col">
+              <p className="text-bold text-small capitalize">{cellValue}</p>
+              <p className="text-bold text-tiny capitalize text-default-400">{evaluation.evaluatorName}</p>
+            </div>
+          );
+        case "status":
+          return (
+            <Chip className="capitalize" color={statusColorMap[evaluation.status]} size="sm" variant="flat">
+              {cellValue}
+            </Chip>
+          );
+        case "actions":
+          return (
+            <div className="relative flex justify-end items-center gap-2">
+              <Dropdown>
+                <DropdownTrigger>
+                  <Button isIconOnly size="sm" variant="light">
+                    <VerticalDotsIcon className="text-default-300" />
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu>
+                  <DropdownItem>View</DropdownItem>
+                  <DropdownItem>Edit</DropdownItem>
+                  <DropdownItem>Delete</DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </div>
+          );
+        default:
+          return cellValue;
+      }
+    }, []);
+
+    const topContent = React.useMemo(() => {
+      return (
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-between gap-3 items-end">
+            <Input
+              isClearable
+              className="w-full sm:max-w-[44%]"
+              placeholder="Search by name..."
+              startContent={<SearchIcon />}
+              value={filterValue}
+              onClear={() => {}}
+              onValueChange={()=>{}}
+            />
+            <div className="flex gap-3">
+              <Dropdown>
+                <DropdownTrigger className="hidden sm:flex">
+                  <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+                    Status
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  disallowEmptySelection
+                  aria-label="Table Columns"
+                  closeOnSelect={false}
+                  selectedKeys={statusFilter}
+                  selectionMode="multiple"
+                  onSelectionChange={setStatusFilter}
+                >
+                  {statusOptions.map((status) => (
+                    <DropdownItem key={status.uid} className="capitalize">
+                      {capitalize(status.name)}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
+              <Dropdown>
+                <DropdownTrigger className="hidden sm:flex">
+                  <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">                  
+                    Columns
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  disallowEmptySelection
+                  aria-label="Table Columns"
+                  closeOnSelect={false}
+                  selectedKeys={visibleColumns}
+                  selectionMode="multiple"
+                  onSelectionChange={setVisibleColumns}
+                >
+                  {columns.map((column) => (
+                    <DropdownItem key={column.uid} className="capitalize">
+                      {capitalize(column.name)}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
+              <Button color="primary" endContent={<PlusIcon />}>
+                Add New
+              </Button>
+            </div>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-default-400 text-small">Total {evaluations.length} evaluations</span>
+            <label className="flex items-center text-default-400 text-small">
+              Rows per page:
+              <select
+                className="bg-transparent outline-none text-default-400 text-small"
+                onChange={()=>{}}
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      );
+    }, [
+      filterValue,
+      statusFilter,
+      visibleColumns,
+      // onSearchChange,
+      // onRowsPerPageChange,
+      evaluations.length,
+      hasSearchFilter,
+    ]);
+  
+    const bottomContent = React.useMemo(() => {
+      return (
+        <div className="py-2 px-2 flex justify-between items-center">
+          <span className="w-[30%] text-small text-default-400">
+            {selectedKeys === "all"
+              ? "All items selected"
+              : `${selectedKeys.size} of ${filteredItems.length} selected`}
+          </span>
+          <Pagination
+            isCompact
+            showControls
+            showShadow
+            color="primary"
+            page={page}
+            total={pages}
+            onChange={setPage}
+          />
+          <div className="hidden sm:flex w-[30%] justify-end gap-2">
+            <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={()=>{}}>
+              Previous
+            </Button>
+            <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={()=>{}}>
+              Next
+            </Button>
+          </div>
+        </div>
+      );
+    }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
+
+    return (
+      <Table
+        aria-label="Example table with custom cells, pagination and sorting"
+        isHeaderSticky
+        bottomContent={bottomContent}
+        bottomContentPlacement="outside"
+        classNames={{
+          wrapper: "max-h-[382px]",
+        }}
+        selectedKeys={selectedKeys}
+        selectionMode="multiple"
+        sortDescriptor={sortDescriptor}
+        topContent={topContent}
+        topContentPlacement="outside"
+        onSelectionChange={setSelectedKeys}
+        onSortChange={setSortDescriptor}
+      >
+        <TableHeader columns={headerColumns}>
+          {(column) => (
+            <TableColumn
+              key={column.uid}
+              align={column.uid === "actions" ? "center" : "start"}
+              allowsSorting={column.sortable}
+            >
+              {column.name}
+            </TableColumn>
+          )}
         </TableHeader>
-        <TableBody emptyContent={"No Evaluations created yet."}>
-          {[]}
+        <TableBody emptyContent={"No evaluations found"} items={sortedItems}>
+          {(item) => (
+            <TableRow key={item.id}>
+              {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+            </TableRow>
+          )}
         </TableBody>
       </Table>
-  );
+    );
+
+  // return (
+  //     <Table aria-label="Example static collection table">
+  //       <TableHeader>
+  //           <TableColumn>Teacher</TableColumn>
+  //           <TableColumn>Class</TableColumn>
+  //           <TableColumn>Date</TableColumn>
+  //           <TableColumn>Evaluator</TableColumn>
+  //           <TableColumn>Status</TableColumn>
+  //           <TableColumn>Actions</TableColumn>
+  //       </TableHeader>
+  //       <TableBody emptyContent={"No Evaluations created yet."}>
+  //         {[]}
+  //       </TableBody>
+  //     </Table>
+  // );
 }

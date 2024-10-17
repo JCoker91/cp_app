@@ -33,13 +33,16 @@ export type Class = {
 
 export type Evaluation = {
   id: string;
-  primaryTeacherId: string;
-  classId: string;
+  primaryTeacherName: string;
+  primaryTeacherEmail: string;
+  primaryTeacherAvatar: string;
+  className: string;
   evaluationNotes: string;
-  evaluationDate: Date;
-  evaluatorId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  evaluationDate: string;
+  evaluatorName: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Subject = {

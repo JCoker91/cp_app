@@ -24,7 +24,7 @@ export default function AboutLayout({
         </NavbarBrand>
       </NavbarContent>
       <NavbarContent className="hidden sm:flex gap-4" justify="center" >
-      <NavLinks />
+        <NavLinks />
       </NavbarContent>
       <NavbarContent className="hidden lg:flex" justify="end">       
         <NavbarItem>
@@ -39,7 +39,7 @@ export default function AboutLayout({
       </NavbarContent>
     </Navbar>
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <div className="inline-block max-w-lg text-center justify-center">
+      <div className="ontainer mx-auto max-w-7xl pt-16 px-6 flex-grow">
         {children}
       </div>
     </section>

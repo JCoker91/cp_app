@@ -27,14 +27,13 @@ const links = [
       <>
         {links.map((link) => {
           return (
-            <NavbarItem>
+            <NavbarItem key={link.href}>
             <NextLink
                   className={clsx(
                     "", {
                         "text-primary font-medium" : pathname === link.href,
                     }
                   )}
-                  key={link.href}
                   href={link.href}
                 >
                 {link.name}
