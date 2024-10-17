@@ -4,7 +4,10 @@ import {Chip, ChipProps} from "@nextui-org/chip";
 import { Evaluation } from "@/types";
 import React from "react";
 import { title } from "@/components/primitives";
-import { Selection, SortDescriptor } from "@nextui-org/react";
+import { Calendar} from "@nextui-org/calendar";
+import {parseDate} from "@internationalized/date";
+import { Card, CardHeader, Selection, SortDescriptor, Image, Divider, CardBody, CardFooter, Link, Spacer, Avatar } from "@nextui-org/react";
+import type {DateValue} from "@react-types/calendar";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/dropdown";
@@ -19,11 +22,13 @@ import {
   TableCell
 } from "@nextui-org/table";
 import { VerticalDotsIcon, ChevronDownIcon, SearchIcon, PlusIcon } from "@/components/icons"; 
+import { time } from "console";
 
 function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+let evalIndex = 0;
 const statusColorMap: Record<string, ChipProps["color"]>= {
   complete: "success",
   pending: "danger",
@@ -45,7 +50,56 @@ const columns = [
   {name: "Actions", uid: "actions"},
 ];
 
-const evaluations: Evaluation[] = [
+const scheduledEvaluations = [
+  {
+    date: "2024-10-17",
+    teacher: "Natasha Romanoff",
+    time: "9:05",
+  },
+  {
+    date: "2024-10-17",
+    teacher: "Peter Parker",
+    time: "8:15",
+  },
+  {
+    date: "2024-10-17",
+    teacher: "Logan Howlett",
+    time: "10:12",
+  },
+  {
+    date: "2024-10-17",
+    teacher: "Kate Bishop",
+    time: "11:45",
+  },
+  {
+    date: "2024-10-17",
+    teacher: "Wade Wilson",
+    time: "12:00",
+  },
+  {
+    date: "2024-10-17",
+    teacher: "Wanda Maximoff",
+    time: "1:15",
+  },
+  {
+    date: "2024-10-17",
+    teacher: "Tony Stark",
+    time: "2:37",
+  },
+  {
+    date: "2024-10-17",
+    teacher: "Carol Danvers",
+    time: "3:00",
+  },
+  {
+    date: "2024-10-17",
+    teacher: "Jennifer Walters",
+    time: "3:24",
+  }
+];
+
+
+const evaluationsList: Evaluation[] = [
   {
     id: "1",
     primaryTeacherName: "Wade Wilson",
@@ -55,7 +109,7 @@ const evaluations: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "complete",
     evaluationDate: '2022-12-12',
-    evaluationNotes: "Great teacher, very patient with students.",
+    evaluationNotes: "Great teacher, very patient with students. Great teacher, very patient with students.Great teacher, very patient with students.Great teacher, very patient with students.Great teacher, very patient with students.Great teacher, very patient with students.",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
   },
@@ -85,7 +139,101 @@ const evaluations: Evaluation[] = [
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
   },
+  {
+    id: "4",
+    primaryTeacherName: "Logan Howlett",
+    primaryTeacherEmail: "logan.howlett@mail.com",
+    primaryTeacherAvatar: "/avatars/logan.howlett.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
+    status: "scheduled",
+    evaluationDate: '2022-12-12',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
+  },
+  {
+    id: "5",
+    primaryTeacherName: "Natasha Romanoff",
+    primaryTeacherEmail: "natasha.romanoff@mail.com",
+    primaryTeacherAvatar: "/avatars/natasha.romanoff.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
+    status: "pending",
+    evaluationDate: '2022-12-12',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
+  },
+  {
+    id: "6",
+    primaryTeacherName: "Kate Bishop",
+    primaryTeacherEmail: "kate.bishop@mail.com",
+    primaryTeacherAvatar: "/avatars/kate.bishop.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
+    status: "complete",
+    evaluationDate: '2022-12-12',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
+  },
+  {
+    id: "7",
+    primaryTeacherName: "Steve Rogers",
+    primaryTeacherEmail: "steve.rogers@mail.com",
+    primaryTeacherAvatar: "/avatars/steve.rogers.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
+    status: "complete",
+    evaluationDate: '2022-12-12',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
+  },
+  {
+    id: "8",
+    primaryTeacherName: "Wanda Maximoff",
+    primaryTeacherEmail: "wanda.maximoff@mail.com",
+    primaryTeacherAvatar: "/avatars/wanda.maximoff.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
+    status: "scheduled",
+    evaluationDate: '2022-12-12',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
+  },
+  {
+    id: "9",
+    primaryTeacherName: "Jennifer Walters",
+    primaryTeacherEmail: "jennifer.walters@mail.com",
+    primaryTeacherAvatar: "/avatars/jennifer.walters.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
+    status: "pending",
+    evaluationDate: '2022-12-12',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
+  },
+  {
+    id: "10",
+    primaryTeacherName: "Carol Danvers",
+    primaryTeacherEmail: "carol.danvers@mail.com",
+    primaryTeacherAvatar: "/avatars/carol.danvers.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
+    status: "complete",
+    evaluationDate: '2022-12-12',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
+  },
 ];
+
+const listCount = 10;
+const evaluations: Evaluation[] = evaluationsList.slice(0,listCount);
 
 const INITIAL_VISIBLE_COLUMNS = ["teacher", "class", "date", "evaluator", "status", "actions"];
 
@@ -95,6 +243,7 @@ export default function EvaluationsPage() {
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [selectedDate, setSelectedDate] = React.useState<DateValue>(parseDate("2024-10-17"));
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
     column: "teacher",
     direction: "ascending",
@@ -325,56 +474,164 @@ export default function EvaluationsPage() {
     }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
 
     return (
-      <Table
-        aria-label="Example table with custom cells, pagination and sorting"
-        isHeaderSticky
-        bottomContent={bottomContent}
-        bottomContentPlacement="outside"
-        classNames={{
-          wrapper: "max-h-[382px]",
-        }}
-        selectedKeys={selectedKeys}
-        selectionMode="multiple"
-        sortDescriptor={sortDescriptor}
-        topContent={topContent}
-        topContentPlacement="outside"
-        onSelectionChange={setSelectedKeys}
-        onSortChange={setSortDescriptor}
-      >
-        <TableHeader columns={headerColumns}>
-          {(column) => (
-            <TableColumn
-              key={column.uid}
-              align={column.uid === "actions" ? "center" : "start"}
-              allowsSorting={column.sortable}
+      <div className="container flex justify-between gap-6">
+         <div className="container flex flex-col w-auto justify-between ">
+              <Calendar 
+                aria-label="Date (Controlled)"
+                value={selectedDate}
+                onChange={setSelectedDate}
+                className="w-full"
+              />
+              <Card className="max-w-[400px] grow">
+              <CardHeader className="flex gap-3">
+                <Image
+                  alt="nextui logo"
+                  height={40}
+                  radius="sm"
+                  src="https://avatars.githubusercontent.com/u/86160567?s=200&v=4"
+                  width={40}
+                />
+                <div className="flex flex-col">
+                  <p className="text-md">October 17th</p>
+                  <p className="text-small text-default-500">scheduled evaluations</p>
+                </div>
+              </CardHeader>
+              <Divider/>
+              <CardBody className="justify-between overflow-y-scroll text-small max-h-[125px]">
+              {
+                scheduledEvaluations.map((evaluation) => (
+                  <>
+                  <div className="flex justify-between">
+                    <p>{evaluation.teacher}</p>
+                    <p>{evaluation.time}</p>
+                  </div>
+                  <Divider/>
+                  </>
+                ))
+              }
+              </CardBody>
+              <Divider/>
+              <CardFooter 
+                className="items-center justify-center"
+              >
+              <Button
+                color="primary"
+                
+              >
+                Schedule Evaluation
+              </Button>
+              </CardFooter>
+            </Card>
+         </div>
+        {/* <Spacer
+          x={24}
+        /> */}
+        <Table
+          aria-label="Example table with custom cells, pagination and sorting"
+          isHeaderSticky={true}
+          bottomContent={bottomContent}
+          bottomContentPlacement="outside"
+          classNames={{
+            wrapper: "h-[382px] overflow-y-auto",
+            td: "text-nowrap",
+          }}
+          selectedKeys={selectedKeys}
+          selectionMode="single"
+          sortDescriptor={sortDescriptor}
+          topContent={topContent}
+          topContentPlacement="outside"
+          onSelectionChange={setSelectedKeys}
+          onSortChange={setSortDescriptor}
+          // isCompact={true}
+          // removeWrapper={true}
+        >
+          <TableHeader columns={headerColumns}>
+            {(column) => (
+              <TableColumn
+                key={column.uid}
+                align={column.uid === "actions" ? "center" : "start"}
+                allowsSorting={column.sortable}
+              >
+                {column.name}
+              </TableColumn>
+            )}
+          </TableHeader>
+          <TableBody emptyContent={"No evaluations found"} items={sortedItems}>
+            {(item) => (
+              <TableRow key={item.id}>
+                {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>  
+        <Card className="w-full grow">
+              <CardHeader className="flex gap-3">
+              <User
+              avatarProps={{radius: "lg", src: evaluations[evalIndex].primaryTeacherAvatar}}
+              description={evaluations[evalIndex].primaryTeacherEmail}
+              name={evaluations[evalIndex].primaryTeacherName}
             >
-              {column.name}
-            </TableColumn>
-          )}
-        </TableHeader>
-        <TableBody emptyContent={"No evaluations found"} items={sortedItems}>
-          {(item) => (
-            <TableRow key={item.id}>
-              {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+              {evaluations[evalIndex].primaryTeacherName}
+            </User>
+              </CardHeader>
+              <Divider/>
+              <CardBody className=" px-4 gap-2">
+                    <div>
+                      <div className="flex justify-between">
+                        <p>Date</p>
+                        <p>{evaluations[evalIndex].evaluationDate}</p>
+                      </div>
+                      <Divider/>
+                    </div>
+                    <div>
+                      <div className="flex justify-between">
+                        <p>Time</p>
+                        <p>8:00am</p>
+                      </div>
+                      <Divider/>
+                    </div>
+                    <div>
+                      <div className="flex justify-between">
+                        <p>Class</p>
+                        <p>{evaluations[evalIndex].className}</p>
+                      </div>
+                      <Divider/>
+                    </div>
+                    <div>
+                    <div className="flex justify-between">
+                      <p>Evaluator</p>
+                      <p>{evaluations[evalIndex].evaluatorName}</p>
+                    </div>
+                    <Divider/>
+                    </div>
+                    <div>
+                      <div className="flex justify-between">
+                        <p>Status</p>
+                        <Chip className="capitalize" color={statusColorMap[evaluations[evalIndex].status]} size="sm" variant="flat">
+                          {evaluations[evalIndex].status}
+                        </Chip>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-center">
+                        <p className="text-center">Notes</p>
+                      </div>
+                    </div>
+                    <div className="py-4 overflow-y-auto max-h-[250px]">
+                        <p className="text-center">{evaluations[evalIndex].evaluationNotes}</p>
+                    </div>
+              </CardBody>
+              {/* <CardFooter 
+                className="items-center justify-center"
+              >
+              <Button
+                color="primary"
+                
+              >
+                Schedule Evaluation
+              </Button>
+              </CardFooter> */}
+            </Card> 
+        </div>
     );
-
-  // return (
-  //     <Table aria-label="Example static collection table">
-  //       <TableHeader>
-  //           <TableColumn>Teacher</TableColumn>
-  //           <TableColumn>Class</TableColumn>
-  //           <TableColumn>Date</TableColumn>
-  //           <TableColumn>Evaluator</TableColumn>
-  //           <TableColumn>Status</TableColumn>
-  //           <TableColumn>Actions</TableColumn>
-  //       </TableHeader>
-  //       <TableBody emptyContent={"No Evaluations created yet."}>
-  //         {[]}
-  //       </TableBody>
-  //     </Table>
-  // );
 }
