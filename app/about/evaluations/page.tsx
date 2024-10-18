@@ -9,6 +9,7 @@ import {parseDate} from "@internationalized/date";
 import { Card, CardHeader, Selection, SortDescriptor, Image, Divider, CardBody, CardFooter, Link, Spacer, Avatar } from "@nextui-org/react";
 import type {DateValue} from "@react-types/calendar";
 import { Button } from "@nextui-org/button";
+import type { Key } from "@react-types/shared";
 import { Input } from "@nextui-org/input";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/dropdown";
 import { User } from "@nextui-org/user";
@@ -42,11 +43,11 @@ const statusOptions = [
 ];
 
 const columns = [
-  {name: "Teacher", uid: "teacher", sortable: true},
+  {name: "Teacher", uid: "primaryTeacherName", sortable: true},
   {name: "Class", uid: "class"},
   {name: "Date", uid: "date"},
   {name: "Evaluator", uid: "evaluator"},
-  {name: "Status", uid: "status"},
+  {name: "Status", uid: "status", sortable: true },
   {name: "Actions", uid: "actions"},
 ];
 
@@ -235,7 +236,7 @@ const evaluationsList: Evaluation[] = [
 const listCount = 10;
 const evaluations: Evaluation[] = evaluationsList.slice(0,listCount);
 
-const INITIAL_VISIBLE_COLUMNS = ["teacher", "class", "date", "evaluator", "status", "actions"];
+const INITIAL_VISIBLE_COLUMNS = ["primaryTeacherName", "class", "date", "evaluator", "status", "actions"];
 
 export default function EvaluationsPage() {
   const [filterValue, setFilterValue] = React.useState("");
@@ -246,8 +247,8 @@ export default function EvaluationsPage() {
   const [selectedDate, setSelectedDate] = React.useState<DateValue>(parseDate("2024-10-17"));
   const [selectedEvaluation, setSelectedEvaluation] = React.useState<Evaluation | null>(null);
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
-    column: "teacher",
-    direction: "ascending",
+    column: "date",
+    direction: "descending",
   });
 
   const [page, setPage] = React.useState(1);
@@ -288,8 +289,8 @@ export default function EvaluationsPage() {
 
     const sortedItems = React.useMemo(() => {
       return [...items].sort((a: Evaluation, b: Evaluation) => {
-        const first = a[sortDescriptor.column as keyof Evaluation] as unknown as number;
-        const second = b[sortDescriptor.column as keyof Evaluation] as unknown as number;
+        const first = a[sortDescriptor.column as keyof Evaluation];
+        const second = b[sortDescriptor.column as keyof Evaluation];
         const cmp = first < second ? -1 : first > second ? 1 : 0;
   
         return sortDescriptor.direction === "descending" ? -cmp : cmp;
@@ -473,7 +474,9 @@ export default function EvaluationsPage() {
         </div>
       );
     }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
-    let evaluationCardData = selectedKeys === null ? null : evaluations[selectedKeys.currentKey - 1];
+
+    let evaluationCardData = selectedKeys !== "all" && selectedKeys.size === 0 ? null : evaluations[Array.from(selectedKeys)[0] as number - 1];
+
     return (
       <div className="container flex justify-between gap-6">
          <div className="container flex flex-col w-auto justify-between ">
@@ -536,11 +539,12 @@ export default function EvaluationsPage() {
             td: "text-nowrap",
           }}
           defaultSelectedKeys={new Set()}
-          selectedKeys={selectedKeys}
           
           
           selectionMode="single"
+          selectedKeys={selectedKeys}
           onSelectionChange={setSelectedKeys}
+
           sortDescriptor={sortDescriptor}
           topContent={topContent}
           topContentPlacement="outside"

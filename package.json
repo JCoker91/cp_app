@@ -30,6 +30,7 @@
     "@react-aria/ssr": "3.9.4",
     "@react-aria/visually-hidden": "3.8.12",
     "@react-types/calendar": "^3.4.10",
+    "@react-types/shared": "^3.25.0",
     "@types/bcrypt": "^5.0.2",
     "@vercel/postgres": "^0.10.0",
     "autoprefixer": "^10.4.20",
