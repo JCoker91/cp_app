@@ -118,7 +118,7 @@ const evaluationsList: Evaluation[] = [
     primaryTeacherName: "Peter Parker",
     primaryTeacherEmail: "peter.parker@mail.com",
     primaryTeacherAvatar: "/avatars/peter.parker.png",
-    className: "Math 101",
+    className: "Writing 121",
     evaluatorName: "Nick Fury",
     status: "pending",
     evaluationDate: '2022-12-12',
@@ -244,6 +244,7 @@ export default function EvaluationsPage() {
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [selectedDate, setSelectedDate] = React.useState<DateValue>(parseDate("2024-10-17"));
+  const [selectedEvaluation, setSelectedEvaluation] = React.useState<Evaluation | null>(null);
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
     column: "teacher",
     direction: "ascending",
@@ -472,6 +473,8 @@ export default function EvaluationsPage() {
         </div>
       );
     }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
+    
+    let evaluationCardData = evaluations[selectedKeys.currentKey - 1];
 
     return (
       <div className="container flex justify-between gap-6">
@@ -500,13 +503,12 @@ export default function EvaluationsPage() {
               <CardBody className="justify-between overflow-y-scroll text-small max-h-[125px]">
               {
                 scheduledEvaluations.map((evaluation) => (
-                  <>
-                  <div className="flex justify-between">
+                  
+                  <div className="flex justify-between" key={evaluation.teacher}>
                     <p>{evaluation.teacher}</p>
                     <p>{evaluation.time}</p>
                   </div>
-                  <Divider/>
-                  </>
+                  
                 ))
               }
               </CardBody>
@@ -536,11 +538,13 @@ export default function EvaluationsPage() {
             td: "text-nowrap",
           }}
           selectedKeys={selectedKeys}
+          
+          
           selectionMode="single"
+          onSelectionChange={setSelectedKeys}
           sortDescriptor={sortDescriptor}
           topContent={topContent}
           topContentPlacement="outside"
-          onSelectionChange={setSelectedKeys}
           onSortChange={setSortDescriptor}
           // isCompact={true}
           // removeWrapper={true}
@@ -567,11 +571,11 @@ export default function EvaluationsPage() {
         <Card className="grow  min-w-[300px]">
               <CardHeader className="flex gap-3">
               <User
-              avatarProps={{radius: "lg", src: evaluations[evalIndex].primaryTeacherAvatar}}
-              description={evaluations[evalIndex].primaryTeacherEmail}
-              name={evaluations[evalIndex].primaryTeacherName}
+              avatarProps={{radius: "lg", src: evaluationCardData.primaryTeacherAvatar}}
+              description={evaluationCardData.primaryTeacherEmail}
+              name={evaluationCardData.primaryTeacherName}
             >
-              {evaluations[evalIndex].primaryTeacherName}
+              {evaluationCardData.primaryTeacherName}
             </User>
               </CardHeader>
               <Divider/>
@@ -579,7 +583,7 @@ export default function EvaluationsPage() {
                     <div>
                       <div className="flex justify-between">
                         <p>Date</p>
-                        <p>{evaluations[evalIndex].evaluationDate}</p>
+                        <p>{evaluationCardData.evaluationDate}</p>
                       </div>
                       <Divider/>
                     </div>
@@ -593,22 +597,22 @@ export default function EvaluationsPage() {
                     <div>
                       <div className="flex justify-between">
                         <p>Class</p>
-                        <p>{evaluations[evalIndex].className}</p>
+                        <p>{evaluationCardData.className}</p>
                       </div>
                       <Divider/>
                     </div>
                     <div>
                     <div className="flex justify-between">
                       <p>Evaluator</p>
-                      <p>{evaluations[evalIndex].evaluatorName}</p>
+                      <p>{evaluationCardData.evaluatorName}</p>
                     </div>
                     <Divider/>
                     </div>
                     <div>
                       <div className="flex justify-between">
                         <p>Status</p>
-                        <Chip className="capitalize" color={statusColorMap[evaluations[evalIndex].status]} size="sm" variant="flat">
-                          {evaluations[evalIndex].status}
+                        <Chip className="capitalize" color={statusColorMap[evaluationCardData.status]} size="sm" variant="flat">
+                          {evaluationCardData.status}
                         </Chip>
                       </div>
                     <Divider/>
@@ -619,7 +623,7 @@ export default function EvaluationsPage() {
                       </div>
                     </div>
                     <div className="overflow-y-auto max-h-[250px]">
-                        <p className="text-start">{evaluations[evalIndex].evaluationNotes}</p>
+                        <p className="text-start">{evaluationCardData.evaluationNotes}</p>
                     </div>
               </CardBody>
               {/* <CardFooter 
