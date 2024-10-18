@@ -473,9 +473,7 @@ export default function EvaluationsPage() {
         </div>
       );
     }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
-    
-    let evaluationCardData = evaluations[selectedKeys.currentKey - 1];
-
+    let evaluationCardData = selectedKeys === null ? null : evaluations[selectedKeys.currentKey - 1];
     return (
       <div className="container flex justify-between gap-6">
          <div className="container flex flex-col w-auto justify-between ">
@@ -537,6 +535,7 @@ export default function EvaluationsPage() {
             wrapper: "h-[382px] overflow-y-auto",
             td: "text-nowrap",
           }}
+          defaultSelectedKeys={new Set()}
           selectedKeys={selectedKeys}
           
           
@@ -571,11 +570,11 @@ export default function EvaluationsPage() {
         <Card className="grow  min-w-[300px]">
               <CardHeader className="flex gap-3">
               <User
-              avatarProps={{radius: "lg", src: evaluationCardData.primaryTeacherAvatar}}
-              description={evaluationCardData.primaryTeacherEmail}
-              name={evaluationCardData.primaryTeacherName}
+              avatarProps={{radius: "lg", src: evaluationCardData?.primaryTeacherAvatar}}
+              description={evaluationCardData?.primaryTeacherEmail}
+              name={evaluationCardData?.primaryTeacherName}
             >
-              {evaluationCardData.primaryTeacherName}
+              {evaluationCardData?.primaryTeacherName}
             </User>
               </CardHeader>
               <Divider/>
@@ -583,7 +582,7 @@ export default function EvaluationsPage() {
                     <div>
                       <div className="flex justify-between">
                         <p>Date</p>
-                        <p>{evaluationCardData.evaluationDate}</p>
+                        <p>{evaluationCardData?.evaluationDate}</p>
                       </div>
                       <Divider/>
                     </div>
@@ -597,22 +596,22 @@ export default function EvaluationsPage() {
                     <div>
                       <div className="flex justify-between">
                         <p>Class</p>
-                        <p>{evaluationCardData.className}</p>
+                        <p>{evaluationCardData?.className}</p>
                       </div>
                       <Divider/>
                     </div>
                     <div>
                     <div className="flex justify-between">
                       <p>Evaluator</p>
-                      <p>{evaluationCardData.evaluatorName}</p>
+                      <p>{evaluationCardData?.evaluatorName}</p>
                     </div>
                     <Divider/>
                     </div>
                     <div>
                       <div className="flex justify-between">
                         <p>Status</p>
-                        <Chip className="capitalize" color={statusColorMap[evaluationCardData.status]} size="sm" variant="flat">
-                          {evaluationCardData.status}
+                        <Chip className="capitalize" color={statusColorMap[evaluationCardData?.status ? evaluationCardData?.status : 1]} size="sm" variant="flat">
+                          {evaluationCardData?.status}
                         </Chip>
                       </div>
                     <Divider/>
@@ -623,7 +622,7 @@ export default function EvaluationsPage() {
                       </div>
                     </div>
                     <div className="overflow-y-auto max-h-[250px]">
-                        <p className="text-start">{evaluationCardData.evaluationNotes}</p>
+                        <p className="text-start">{evaluationCardData?.evaluationNotes}</p>
                     </div>
               </CardBody>
               {/* <CardFooter 
