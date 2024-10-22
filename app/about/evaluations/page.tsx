@@ -228,7 +228,59 @@ const evaluationsList: Evaluation[] = [
     className: "Math 101",
     evaluatorName: "Nick Fury",
     status: "complete",
-    evaluationDate: '2022-12-12',
+    evaluationDate: '2024-10-20',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
+  },
+  {
+    id: "12",
+    primaryTeacherName: "Carol Danvers",
+    primaryTeacherEmail: "carol.danvers@mail.com",
+    primaryTeacherAvatar: "/avatars/carol.danvers.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
+    status: "complete",
+    evaluationDate: '2024-10-26',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
+  },
+  {
+    id: "13",
+    primaryTeacherName: "Carol Danvers",
+    primaryTeacherEmail: "carol.danvers@mail.com",
+    primaryTeacherAvatar: "/avatars/carol.danvers.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
+    status: "complete",
+    evaluationDate: '2024-10-23',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
+  },
+  {
+    id: "14",
+    primaryTeacherName: "Carol Danvers",
+    primaryTeacherEmail: "carol.danvers@mail.com",
+    primaryTeacherAvatar: "/avatars/carol.danvers.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
+    status: "complete",
+    evaluationDate: '2024-10-27',
+    evaluationNotes: "Teacher keeps dodging my calls...",
+    createdAt: '2022-12-12',
+    updatedAt: '2022-12-12',
+  },
+  {
+    id: "15",
+    primaryTeacherName: "Carol Danversk",
+    primaryTeacherEmail: "carol.danvers@mail.com",
+    primaryTeacherAvatar: "/avatars/carol.danvers.png",
+    className: "Math 101",
+    evaluatorName: "Nick Fury",
+    status: "complete",
+    evaluationDate: '2024-10-19',
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -236,7 +288,7 @@ const evaluationsList: Evaluation[] = [
 ];
 
 const listCount = 10;
-const evaluations: Evaluation[] = evaluationsList.slice(0,listCount);
+const evaluations: Evaluation[] = evaluationsList;
 const DATE_RANGES = [
   {
     name: "All",
@@ -267,6 +319,25 @@ const DATE_RANGES = [
   },
  ];
 const INITIAL_VISIBLE_COLUMNS = ["primaryTeacherName", "className", "evaluationDate", "evaluatorName", "status", "actions"];
+
+function getWeekDateRange() {
+  const today = new Date();
+
+  if (today.getDay() === 0) {
+      today.setDate(today.getDate() - 1);
+  }
+
+  const first = today.getDate() - today.getDay();
+  const last = first + 6;
+
+  today.setHours(0,0,0);
+  const firstDay = new Date(today.setDate(first));
+  today.setHours(23,59,0);
+  const lastDay = new Date(today.setDate(last));
+
+  return [firstDay, lastDay];
+}
+
 
 export default function EvaluationsPage() {
   const [filterValue, setFilterValue] = React.useState("");
@@ -322,9 +393,13 @@ export default function EvaluationsPage() {
         );
       }
 
-      if (!Array.from(dateRange).includes("all")) {
+      console.log(dateRange);
+      if (!dateRange.has("all")) {
+        const [firstDay, lastDay] = getWeekDateRange();
+        getWeekDateRange()[0];
         _filteredEvaluations = _filteredEvaluations.filter((evaluation) => {
-          return dateRange.has("thisWeek") && parseDate(evaluation.evaluationDate).compare(parseDate(new Date().toISOString().split('T')[0])) > 0;
+          return (dateRange.has("thisWeek") && parseDate(evaluation.evaluationDate).compare(parseDate(firstDay.toISOString().split('T')[0])) >= 0 && parseDate(evaluation.evaluationDate).compare(parseDate(lastDay.toISOString().split('T')[0])) < 0);
+          
         }
 
       );
