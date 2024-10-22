@@ -44,12 +44,14 @@ const statusOptions = [
 
 const columns = [
   {name: "Teacher", uid: "primaryTeacherName", sortable: true},
-  {name: "Class", uid: "class"},
-  {name: "Date", uid: "date"},
-  {name: "Evaluator", uid: "evaluator"},
+  {name: "Class", uid: "className", sortable: true},
+  {name: "Date", uid: "evaluationDate", sortable: true},
+  {name: "Evaluator", uid: "evaluatorName", sortable: true},
   {name: "Status", uid: "status", sortable: true },
   {name: "Actions", uid: "actions"},
 ];
+
+
 
 const scheduledEvaluations = [
   {
@@ -135,7 +137,7 @@ const evaluationsList: Evaluation[] = [
     className: "Math 101",
     evaluatorName: "Nick Fury",
     status: "scheduled",
-    evaluationDate: '2022-12-12',
+    evaluationDate: '2023-12-12',
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -148,7 +150,7 @@ const evaluationsList: Evaluation[] = [
     className: "Math 101",
     evaluatorName: "Nick Fury",
     status: "scheduled",
-    evaluationDate: '2022-12-12',
+    evaluationDate: '2021-12-12',
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -236,7 +238,7 @@ const evaluationsList: Evaluation[] = [
 const listCount = 10;
 const evaluations: Evaluation[] = evaluationsList.slice(0,listCount);
 
-const INITIAL_VISIBLE_COLUMNS = ["primaryTeacherName", "class", "date", "evaluator", "status", "actions"];
+const INITIAL_VISIBLE_COLUMNS = ["primaryTeacherName", "className", "evaluationDate", "evaluatorName", "status", "actions"];
 
 export default function EvaluationsPage() {
   const [filterValue, setFilterValue] = React.useState("");
@@ -247,12 +249,19 @@ export default function EvaluationsPage() {
   const [selectedDate, setSelectedDate] = React.useState<DateValue>(parseDate("2024-10-17"));
   const [selectedEvaluation, setSelectedEvaluation] = React.useState<Evaluation | null>(null);
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
-    column: "date",
+    column: "evaluationDate",
     direction: "descending",
   });
 
   const [page, setPage] = React.useState(1);
   const hasSearchFilter = Boolean(filterValue);
+
+
+    const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+      setRowsPerPage(Number(e.target.value));
+      setPage(1);
+    }, []);
+
 
   const headerColumns = React.useMemo(() => {
       if (visibleColumns === "all") return columns;
@@ -300,7 +309,7 @@ export default function EvaluationsPage() {
     const renderCell = React.useCallback((evaluation: Evaluation, columnKey: React.Key) => {
       const cellValue = evaluation[columnKey as keyof Evaluation];
       switch (columnKey) {
-        case "teacher":
+        case "primaryTeacherName":
           return (
             <User
               avatarProps={{radius: "lg", src: evaluation.primaryTeacherAvatar}}
@@ -310,24 +319,21 @@ export default function EvaluationsPage() {
               {evaluation.primaryTeacherName}
             </User>
           );
-        case "class":
+        case "className":
           return (
             <div className="flex flex-col">
-              <p className="text-bold text-small capitalize">{cellValue}</p>
               <p className="text-bold text-tiny capitalize text-default-400">{evaluation.className}</p>
             </div>
           );
-        case "date":
+        case "evaluationDate":
           return (
             <div className="flex flex-col">
-              <p className="text-bold text-small capitalize">{cellValue}</p>
               <p className="text-bold text-tiny capitalize text-default-400">{evaluation.evaluationDate}</p>
             </div>
           );
-        case "evaluator":
+        case "evaluatorName":
           return (
             <div className="flex flex-col">
-              <p className="text-bold text-small capitalize">{cellValue}</p>
               <p className="text-bold text-tiny capitalize text-default-400">{evaluation.evaluatorName}</p>
             </div>
           );
@@ -346,10 +352,12 @@ export default function EvaluationsPage() {
                     <VerticalDotsIcon className="text-default-300" />
                   </Button>
                 </DropdownTrigger>
-                <DropdownMenu>
-                  <DropdownItem>View</DropdownItem>
-                  <DropdownItem>Edit</DropdownItem>
-                  <DropdownItem>Delete</DropdownItem>
+                <DropdownMenu
+                  onAction={(key) => alert(key)}
+                >
+                  <DropdownItem key="view">View</DropdownItem>
+                  <DropdownItem key="edit">Edit</DropdownItem>
+                  <DropdownItem key="delete">Delete</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
             </div>
@@ -426,7 +434,7 @@ export default function EvaluationsPage() {
               Rows per page:
               <select
                 className="bg-transparent outline-none text-default-400 text-small"
-                onChange={()=>{}}
+                onChange={onRowsPerPageChange}
               >
                 <option value="5">5</option>
                 <option value="10">10</option>
@@ -441,7 +449,7 @@ export default function EvaluationsPage() {
       statusFilter,
       visibleColumns,
       // onSearchChange,
-      // onRowsPerPageChange,
+      onRowsPerPageChange,
       evaluations.length,
       hasSearchFilter,
     ]);
