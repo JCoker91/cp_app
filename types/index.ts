@@ -16,6 +16,13 @@ export type User = {
   updatedAt: Date;
 };
 
+export type Teacher =  {
+  name: string;
+  email: string;
+  avatar: string;
+  classes: string[];
+}
+
 export type UserWithPassword = User & {
   password: string;
 };

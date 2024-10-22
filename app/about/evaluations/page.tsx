@@ -5,7 +5,7 @@ import { Evaluation } from "@/types";
 import React from "react";
 import { title } from "@/components/primitives";
 import { Calendar} from "@nextui-org/calendar";
-import {parseDate} from "@internationalized/date";
+// import {parseDate} from "@internationalized/date";
 import { Card, CardHeader, Selection, SortDescriptor, Image, Divider, CardBody, CardFooter, Link, Spacer, Avatar } from "@nextui-org/react";
 import type {DateValue} from "@react-types/calendar";
 import { Button } from "@nextui-org/button";
@@ -23,6 +23,7 @@ import {
   TableCell
 } from "@nextui-org/table";
 import { VerticalDotsIcon, ChevronDownIcon, SearchIcon, PlusIcon } from "@/components/icons"; 
+import { generateListOfRandomEvaluations } from "@/util/mock_data";
 import { time } from "console";
 
 function capitalize(str: string) {
@@ -102,7 +103,7 @@ const scheduledEvaluations = [
 ];
 
 
-const evaluationsList: Evaluation[] = [
+const evaluationsListStatic: Evaluation[] = [
   {
     id: "1",
     primaryTeacherName: "Wade Wilson",
@@ -280,12 +281,14 @@ const evaluationsList: Evaluation[] = [
     className: "Math 101",
     evaluatorName: "Nick Fury",
     status: "complete",
-    evaluationDate: '2024-10-19',
+    evaluationDate: '2024-10-17',
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
   },
 ];
+
+const evaluationsList = generateListOfRandomEvaluations(15);
 
 const listCount = 10;
 const evaluations: Evaluation[] = evaluationsList;
@@ -295,15 +298,16 @@ const DATE_RANGES = [
     uid: "all",
   },
   {
-  name: "This Week",
-  uid: "thisWeek",},
-  {
-  name: "Last Week",
-  uid: "lastWeek",
+    name: "This Week",
+    uid: "thisWeek",
   },
   {
-  name: "This Month",
-  uid: "thisMonth",
+    name: "Last Week",
+    uid: "lastWeek",
+  },
+  {
+    name: "This Month",
+    uid: "thisMonth",
   },
   {
     name: "Last 3 Months",
@@ -320,11 +324,36 @@ const DATE_RANGES = [
  ];
 const INITIAL_VISIBLE_COLUMNS = ["primaryTeacherName", "className", "evaluationDate", "evaluatorName", "status", "actions"];
 
-function getWeekDateRange() {
+function getEvaluationMonthAndYear(evaluationDate: string): [number, number]{
+  const date = new Date(Date.parse(evaluationDate));
+  return [date.getMonth(), date.getFullYear()];
+}
+
+function getMonthRange(monthsBack: number) : [number,number][] {
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+  let month = currentMonth;
+  let year = currentYear;
+  const monthRange : [number,number][] = [];
+  for (let i = 0; i < monthsBack; i++) {
+    monthRange.push([month, year]);
+    month--;
+    if (month < 0) {
+      month = 11;
+      year--;
+    }
+  }
+  return monthRange;
+}
+
+function getWeekDateRange(week: string = "thisWeek"): [Date, Date] {
+  
+  
   const today = new Date();
 
-  if (today.getDay() === 0) {
-      today.setDate(today.getDate() - 1);
+  if (week === "lastWeek") {
+      today.setDate(today.getDate() - 7);
   }
 
   const first = today.getDate() - today.getDay();
@@ -343,10 +372,10 @@ export default function EvaluationsPage() {
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
-  const [dateRange, setDateRange] = React.useState<Set<string>>(new Set(["all"]));
+  const [dateRange, setDateRange] = React.useState<string>("all");
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [selectedDate, setSelectedDate] = React.useState<DateValue>(parseDate("2024-10-17"));
+  const [selectedDate, setSelectedDate] = React.useState<DateValue>();
   const [selectedEvaluation, setSelectedEvaluation] = React.useState<Evaluation | null>(null);
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
     column: "evaluationDate",
@@ -381,7 +410,7 @@ export default function EvaluationsPage() {
 
     const filteredItems = React.useMemo(() => {
       let _filteredEvaluations = [...evaluations];
-  
+      setSelectedEvaluation(null);
       if (hasSearchFilter) {
         _filteredEvaluations = _filteredEvaluations.filter((evaluation) =>
           evaluation.primaryTeacherName.toLowerCase().includes(filterValue.toLowerCase()),
@@ -393,24 +422,28 @@ export default function EvaluationsPage() {
         );
       }
 
-      console.log(dateRange);
-      if (!dateRange.has("all")) {
-        const [firstDay, lastDay] = getWeekDateRange();
-        getWeekDateRange()[0];
-        _filteredEvaluations = _filteredEvaluations.filter((evaluation) => {
-          return (dateRange.has("thisWeek") && parseDate(evaluation.evaluationDate).compare(parseDate(firstDay.toISOString().split('T')[0])) >= 0 && parseDate(evaluation.evaluationDate).compare(parseDate(lastDay.toISOString().split('T')[0])) < 0);
-          
-        }
+      if (dateRange !== ("all")) {
+        const [firstWeekFirstDay, firstWeekLastDay] = getWeekDateRange("thisWeek");
+        const [lastWeekFirstDay, lastWeekLastDay] = getWeekDateRange("lastWeek");
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
 
+        
+
+        _filteredEvaluations = _filteredEvaluations.filter((evaluation) => {
+          const [evalMonth, evalYear] = getEvaluationMonthAndYear(evaluation.evaluationDate);
+          return (dateRange === "all")
+          // || ((dateRange === "thisWeek") && (new Date(Date.parse(evaluation.evaluationDate)) >= new Date(Date.parse(firstWeekFirstDay)).toISOString().split('T')[0]) && (parseDate(evaluation.evaluationDate).compare(parseDate(firstWeekLastDay.toISOString().split('T')[0])) < 0))          
+          // || ((dateRange === "lastWeek") && (parseDate(evaluation.evaluationDate).compare(parseDate(lastWeekFirstDay.toISOString().split('T')[0])) >= 0) && (parseDate(evaluation.evaluationDate).compare(parseDate(lastWeekLastDay.toISOString().split('T')[0])) < 0))
+          || ((dateRange === "thisMonth") && (getMonthRange(1).some(([month, year]) => month === evalMonth && year === evalYear)))
+          || ((dateRange === "lastThreeMonths") && (getMonthRange(3).some(([month, year]) => month === evalMonth && year === evalYear)))
+          || ((dateRange === "lastSixMonths") && (getMonthRange(6).some(([month, year]) => month === evalMonth && year === evalYear)))
+          || ((dateRange === "lastTwelveMonths") && (getMonthRange(12).some(([month, year]) => month === evalMonth && year === evalYear)));
+        }
       );
     }
-      
-    
-      
-      
-  
       return _filteredEvaluations;
-    }, [evaluations, filterValue, statusFilter, dateRange]);
+    }, [evaluations, filterValue, statusFilter, dateRange, selectedEvaluation]);
 
     const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -547,17 +580,17 @@ export default function EvaluationsPage() {
               </Dropdown>
               <Dropdown>
                 <DropdownTrigger className="hidden sm:flex">
-                  <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">                  
+                  <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">                                      
                     Date Range
+                    <p className="text-default-400 text-small">{DATE_RANGES.filter((dr) => dr.uid === dateRange)[0]?.name || "Not found"}</p>                    
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
                   disallowEmptySelection
                   aria-label="Table Date Range"
-                  closeOnSelect={false}
-                  selectedKeys={dateRange}
+                  closeOnSelect={true}
                   selectionMode="single"
-                  onSelectionChange={(keys) => setDateRange(new Set(keys as unknown as string[]))}
+                  onAction={(key) => setDateRange(key.toString())}
                 >
                   {DATE_RANGES.map((column) => (
                     <DropdownItem key={column.uid} className="capitalize">
@@ -572,7 +605,7 @@ export default function EvaluationsPage() {
             </div>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-default-400 text-small">Total {sortedItems.length} evaluations</span>
+            <span className="text-default-400 text-small">Total {filteredItems.length} evaluations</span>
             <label className="flex items-center text-default-400 text-small">
               Rows per page:
               <select
@@ -592,8 +625,9 @@ export default function EvaluationsPage() {
       statusFilter,
       visibleColumns,
       onSearchChange,
+      dateRange,
       onRowsPerPageChange,
-      evaluations.length,
+      filteredItems.length,
       hasSearchFilter,
     ]);
   
