@@ -163,7 +163,7 @@ const evaluationsList: Evaluation[] = [
     className: "Math 101",
     evaluatorName: "Nick Fury",
     status: "pending",
-    evaluationDate: '2022-12-12',
+    evaluationDate: '2024-12-12',
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -237,13 +237,42 @@ const evaluationsList: Evaluation[] = [
 
 const listCount = 10;
 const evaluations: Evaluation[] = evaluationsList.slice(0,listCount);
-
+const DATE_RANGES = [
+  {
+    name: "All",
+    uid: "all",
+  },
+  {
+  name: "This Week",
+  uid: "thisWeek",},
+  {
+  name: "Last Week",
+  uid: "lastWeek",
+  },
+  {
+  name: "This Month",
+  uid: "thisMonth",
+  },
+  {
+    name: "Last 3 Months",
+    uid: "lastThreeMonths",
+  },
+  {
+    name: "Last 6 Months",
+    uid: "lastSixMonths",
+  },
+  {
+    name: "Last 12 Months",
+    uid: "lastTwelveMonths",
+  },
+ ];
 const INITIAL_VISIBLE_COLUMNS = ["primaryTeacherName", "className", "evaluationDate", "evaluatorName", "status", "actions"];
 
 export default function EvaluationsPage() {
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
+  const [dateRange, setDateRange] = React.useState<Set<string>>(new Set(["all"]));
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [selectedDate, setSelectedDate] = React.useState<DateValue>(parseDate("2024-10-17"));
@@ -263,6 +292,15 @@ export default function EvaluationsPage() {
     }, []);
 
 
+    const onSearchChange = React.useCallback((value?: string) => {
+      if (value) {
+        setFilterValue(value);
+        setPage(1);
+      } else {
+        setFilterValue("");
+      }
+    }, []);
+
   const headerColumns = React.useMemo(() => {
       if (visibleColumns === "all") return columns;
 
@@ -271,21 +309,33 @@ export default function EvaluationsPage() {
 
 
     const filteredItems = React.useMemo(() => {
-      let filteredUsers = [...evaluations];
+      let _filteredEvaluations = [...evaluations];
   
       if (hasSearchFilter) {
-        filteredUsers = filteredUsers.filter((evaluation) =>
+        _filteredEvaluations = _filteredEvaluations.filter((evaluation) =>
           evaluation.primaryTeacherName.toLowerCase().includes(filterValue.toLowerCase()),
         );
       }
       if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-        filteredUsers = filteredUsers.filter((user) =>
-          Array.from(statusFilter).includes(user.status),
+        _filteredEvaluations = _filteredEvaluations.filter((evaluation) =>
+          Array.from(statusFilter).includes(evaluation.status),
         );
       }
+
+      if (!Array.from(dateRange).includes("all")) {
+        _filteredEvaluations = _filteredEvaluations.filter((evaluation) => {
+          return dateRange.has("thisWeek") && parseDate(evaluation.evaluationDate).compare(parseDate(new Date().toISOString().split('T')[0])) > 0;
+        }
+
+      );
+    }
+      
+    
+      
+      
   
-      return filteredUsers;
-    }, [evaluations, filterValue, statusFilter]);
+      return _filteredEvaluations;
+    }, [evaluations, filterValue, statusFilter, dateRange]);
 
     const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -295,6 +345,24 @@ export default function EvaluationsPage() {
   
       return filteredItems.slice(start, end);
     }, [page, filteredItems, rowsPerPage]);
+
+
+    const onClear = React.useCallback(()=>{
+      setFilterValue("")
+      setPage(1)
+    },[])
+
+    const onNextPage = React.useCallback(() => {
+      if (page < pages) {
+        setPage(page + 1);
+      }
+    }, [page, pages]);
+  
+    const onPreviousPage = React.useCallback(() => {
+      if (page > 1) {
+        setPage(page - 1);
+      }
+    }, [page]);
 
     const sortedItems = React.useMemo(() => {
       return [...items].sort((a: Evaluation, b: Evaluation) => {
@@ -377,8 +445,8 @@ export default function EvaluationsPage() {
               placeholder="Search by name..."
               startContent={<SearchIcon />}
               value={filterValue}
-              onClear={() => {}}
-              onValueChange={()=>{}}
+              onClear={() => onClear()}
+              onValueChange={onSearchChange}
             />
             <div className="flex gap-3">
               <Dropdown>
@@ -405,18 +473,18 @@ export default function EvaluationsPage() {
               <Dropdown>
                 <DropdownTrigger className="hidden sm:flex">
                   <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">                  
-                    Columns
+                    Date Range
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
                   disallowEmptySelection
-                  aria-label="Table Columns"
+                  aria-label="Table Date Range"
                   closeOnSelect={false}
-                  selectedKeys={visibleColumns}
-                  selectionMode="multiple"
-                  onSelectionChange={setVisibleColumns}
+                  selectedKeys={dateRange}
+                  selectionMode="single"
+                  onSelectionChange={(keys) => setDateRange(new Set(keys as unknown as string[]))}
                 >
-                  {columns.map((column) => (
+                  {DATE_RANGES.map((column) => (
                     <DropdownItem key={column.uid} className="capitalize">
                       {capitalize(column.name)}
                     </DropdownItem>
@@ -429,7 +497,7 @@ export default function EvaluationsPage() {
             </div>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-default-400 text-small">Total {evaluations.length} evaluations</span>
+            <span className="text-default-400 text-small">Total {sortedItems.length} evaluations</span>
             <label className="flex items-center text-default-400 text-small">
               Rows per page:
               <select
@@ -448,7 +516,7 @@ export default function EvaluationsPage() {
       filterValue,
       statusFilter,
       visibleColumns,
-      // onSearchChange,
+      onSearchChange,
       onRowsPerPageChange,
       evaluations.length,
       hasSearchFilter,
@@ -472,16 +540,16 @@ export default function EvaluationsPage() {
             onChange={setPage}
           />
           <div className="hidden sm:flex w-[30%] justify-end gap-2">
-            <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={()=>{}}>
+            <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onPreviousPage}>
               Previous
             </Button>
-            <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={()=>{}}>
+            <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onNextPage}>
               Next
             </Button>
           </div>
         </div>
       );
-    }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
+    }, [selectedKeys, sortedItems.length, page, pages, hasSearchFilter]);
 
     let evaluationCardData = selectedKeys !== "all" && selectedKeys.size === 0 ? null : evaluations[Array.from(selectedKeys)[0] as number - 1];
 
