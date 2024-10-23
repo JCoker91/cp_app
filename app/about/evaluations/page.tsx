@@ -433,7 +433,8 @@ export default function EvaluationsPage() {
         _filteredEvaluations = _filteredEvaluations.filter((evaluation) => {
           const [evalMonth, evalYear] = getEvaluationMonthAndYear(evaluation.evaluationDate);
           return (dateRange === "all")
-          // || ((dateRange === "thisWeek") && (new Date(Date.parse(evaluation.evaluationDate)) >= new Date(Date.parse(firstWeekFirstDay)).toISOString().split('T')[0]) && (parseDate(evaluation.evaluationDate).compare(parseDate(firstWeekLastDay.toISOString().split('T')[0])) < 0))          
+          || ((dateRange === "thisWeek") && (new Date(Date.parse(evaluation.evaluationDate)) >= new Date(Date.parse(firstWeekFirstDay.toISOString()))) && (new Date(Date.parse(evaluation.evaluationDate)) <= new Date(Date.parse(firstWeekLastDay.toISOString()))))          
+          || ((dateRange === "lastWeek") && (new Date(Date.parse(evaluation.evaluationDate)) >= new Date(Date.parse(lastWeekFirstDay.toISOString()))) && (new Date(Date.parse(evaluation.evaluationDate)) <= new Date(Date.parse(lastWeekLastDay.toISOString()))))          
           // || ((dateRange === "lastWeek") && (parseDate(evaluation.evaluationDate).compare(parseDate(lastWeekFirstDay.toISOString().split('T')[0])) >= 0) && (parseDate(evaluation.evaluationDate).compare(parseDate(lastWeekLastDay.toISOString().split('T')[0])) < 0))
           || ((dateRange === "thisMonth") && (getMonthRange(1).some(([month, year]) => month === evalMonth && year === evalYear)))
           || ((dateRange === "lastThreeMonths") && (getMonthRange(3).some(([month, year]) => month === evalMonth && year === evalYear)))
