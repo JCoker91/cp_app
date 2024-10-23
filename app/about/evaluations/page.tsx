@@ -288,7 +288,7 @@ const evaluationsListStatic: Evaluation[] = [
   },
 ];
 
-const evaluationsList = generateListOfRandomEvaluations(15);
+const evaluationsList = generateListOfRandomEvaluations(1000);
 
 const listCount = 10;
 const evaluations: Evaluation[] = evaluationsList;
@@ -660,8 +660,8 @@ export default function EvaluationsPage() {
       );
     }, [selectedKeys, sortedItems.length, page, pages, hasSearchFilter]);
 
-    let evaluationCardData = selectedKeys !== "all" && selectedKeys.size === 0 ? null : evaluations[Array.from(selectedKeys)[0] as number - 1];
-
+    let evaluationCardData = selectedKeys !== "all" && selectedKeys.size === 0 ? null : evaluations.filter((evals) => Array.from(selectedKeys)[0] === evals.id)[0];
+    
     return (
       <div className="container flex justify-between gap-6">
          <div className="container flex flex-col w-auto justify-between ">
