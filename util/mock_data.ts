@@ -1,3 +1,4 @@
+import { today } from "@internationalized/date";
 import { Evaluation, Teacher } from "../types";
 import { LoremIpsum } from "lorem-ipsum";
 
@@ -7,7 +8,14 @@ function randomDate(start: Date, end: Date) : Date {
 
 export function generateListOfRandomEvaluations(count: number) : Evaluation[] {
     const evaluations: Evaluation[] = [];
-    const statuses = ["complete", "scheduled", "pending"];
+    const todaysDate = new Date();
+    const thisMonth = todaysDate.getMonth();
+    const thisYear = todaysDate.getFullYear();
+    const startDateRange = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
+    const endDateRange = new Date(new Date().setMonth(new Date().getMonth() + 1));
+    const pastStatuses = ["complete", "pending"];
+    const futureStatuses = ["scheduled", "pending"];
+    
     const teachers: Teacher[] = [
         {
             name: "Wade Wilson",
@@ -109,11 +117,16 @@ export function generateListOfRandomEvaluations(count: number) : Evaluation[] {
                 "Chemistry 101"
             ]
         },
-
+        
     ];
+    
     for (let i = 0; i < count; i++) {
         const teacher = teachers[Math.floor(Math.random() * teachers.length)];
         const lorem = new LoremIpsum();
+        const evalDate = randomDate(startDateRange, endDateRange).toLocaleDateString();
+        const evalDateObj = new Date(evalDate);
+        let isThisMonth = thisMonth == evalDateObj.getMonth() && thisYear == evalDateObj.getFullYear();
+        const status = todaysDate < evalDateObj ? "scheduled" : isThisMonth ? pastStatuses[Math.floor(Math.random() * pastStatuses.length)] : "complete";
         const evaluation: Evaluation = {
             id: Math.random().toString(36).substring(7),
             primaryTeacherName: teacher.name,
@@ -121,9 +134,9 @@ export function generateListOfRandomEvaluations(count: number) : Evaluation[] {
             primaryTeacherAvatar: teacher.avatar,
             className: teacher.classes[Math.floor(Math.random() * teacher.classes.length)],
             evaluationNotes: lorem.generateSentences(Math.floor(Math.random() * 5) + 2),
-            evaluationDate: randomDate(new Date(2023, 0, 1), new Date()).toLocaleDateString(),
+            evaluationDate: evalDate,
             evaluatorName: "Nick Fury",
-            status: statuses[Math.floor(Math.random() * statuses.length)],
+            status: status,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -132,3 +145,4 @@ export function generateListOfRandomEvaluations(count: number) : Evaluation[] {
 
     return evaluations;
 }
+

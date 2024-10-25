@@ -1,5 +1,5 @@
 import { SVGProps } from "react";
-
+import fs from "fs";
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;
 };
@@ -58,3 +58,35 @@ export type Subject = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+
+export function writeEvaluationToJson(evaluation: Evaluation) {
+  return JSON.stringify(evaluation, null, 2);
+}
+
+export function readEvaluationFromJson(json: string): Evaluation {
+  return JSON.parse(json) as Evaluation;
+}
+
+export function writeEvaluationToFile(evaluation: Evaluation, path: string) {
+  fs.writeFile(path, writeEvaluationToJson(evaluation), (err) => {
+    if (err) {
+      console.error(err);
+    }
+  });
+} 
+
+export function writeEvaluationListToFile(evaluations: Evaluation[], path: string) {
+  fs.writeFile(path, JSON.stringify(evaluations, null, 2), (err) => {
+    if (err) {
+      console.error(err);
+    }
+  }); 
+}
+
+export function readEvaluationsFromFile(path: string) {
+  return JSON.parse(fs.readFileSync(path, "utf-8")) as Evaluation[];  
+}
+
+
+export const generatedEvaluationList : Evaluation[] = readEvaluationsFromFile("./evaluations.json");

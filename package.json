@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev --turbo",
+    "dev": "cross-env NODE_OPTIONS='--inspect' next dev --turbo",
     "start": "next start"
   },
   "dependencies": {
@@ -36,7 +36,9 @@
     "autoprefixer": "^10.4.20",
     "bcrypt": "^5.1.1",
     "clsx": "2.1.1",
+    "cross-env": "^7.0.3",
     "framer-motion": "~11.1.1",
+    "fs": "0.0.1-security",
     "intl-messageformat": "^10.5.0",
     "lorem-ipsum": "^2.0.8",
     "next": "15.0.0-canary.194",

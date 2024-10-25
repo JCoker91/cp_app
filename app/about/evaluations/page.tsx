@@ -1,12 +1,13 @@
 "use client";
 
 import {Chip, ChipProps} from "@nextui-org/chip";
-import { Evaluation } from "@/types";
+import { Evaluation, readEvaluationsFromFile, generatedEvaluationList } from "@/types";
 import React from "react";
 import { title } from "@/components/primitives";
 import { Calendar} from "@nextui-org/calendar";
 // import {parseDate} from "@internationalized/date";
-import { Card, CardHeader, Selection, SortDescriptor, Image, Divider, CardBody, CardFooter, Link, Spacer, Avatar } from "@nextui-org/react";
+import * as data from "../../../evaluations.json";
+import { Card, CardHeader, Selection, SortDescriptor, Image, Divider, CardBody, CardFooter, Link, Spacer, Avatar, cn } from "@nextui-org/react";
 import type {DateValue} from "@react-types/calendar";
 import { Button } from "@nextui-org/button";
 import type { Key } from "@react-types/shared";
@@ -22,9 +23,9 @@ import {
   TableRow,
   TableCell
 } from "@nextui-org/table";
-import { VerticalDotsIcon, ChevronDownIcon, SearchIcon, PlusIcon } from "@/components/icons"; 
-import { generateListOfRandomEvaluations } from "@/util/mock_data";
-import { time } from "console";
+import clsx from "clsx";
+import { VerticalDotsIcon, ChevronDownIcon, SearchIcon, PlusIcon } from "@/components/icons";
+import { text } from "stream/consumers";
 
 function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -51,6 +52,7 @@ const columns = [
   {name: "Status", uid: "status", sortable: true },
   {name: "Actions", uid: "actions"},
 ];
+
 
 
 
@@ -288,10 +290,28 @@ const evaluationsListStatic: Evaluation[] = [
   },
 ];
 
-const evaluationsList = generateListOfRandomEvaluations(1000);
+function readEvaluationFromObject(data: any): Evaluation {
+  return {
+    id: data.id,
+    primaryTeacherName: data.primaryTeacherName,
+    primaryTeacherEmail: data.primaryTeacherEmail,
+    primaryTeacherAvatar: data.primaryTeacherAvatar,
+    className: data.className,
+    evaluatorName: data.evaluatorName,
+    status: data.status,
+    evaluationDate: data.evaluationDate,
+    evaluationNotes: data.evaluationNotes,
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt,
+  };
+}
 
-const listCount = 10;
-const evaluations: Evaluation[] = evaluationsList;
+
+
+const listCount = 1000;
+const evaluationsList : Evaluation[] = Object.keys(data).slice(0,listCount).map((k:any) => data[k] as Evaluation);
+
+const evaluations: Evaluation[] = evaluationsList.sort((a: Evaluation,b: Evaluation) => {return Date.parse(a.evaluationDate) < Date.parse(b.evaluationDate) ? 1 : -1;});
 const DATE_RANGES = [
   {
     name: "All",
@@ -434,14 +454,14 @@ export default function EvaluationsPage() {
           const [evalMonth, evalYear] = getEvaluationMonthAndYear(evaluation.evaluationDate);
           return (dateRange === "all")
           || ((dateRange === "thisWeek") && (new Date(Date.parse(evaluation.evaluationDate)) >= new Date(Date.parse(firstWeekFirstDay.toISOString()))) && (new Date(Date.parse(evaluation.evaluationDate)) <= new Date(Date.parse(firstWeekLastDay.toISOString()))))          
-          || ((dateRange === "lastWeek") && (new Date(Date.parse(evaluation.evaluationDate)) >= new Date(Date.parse(lastWeekFirstDay.toISOString()))) && (new Date(Date.parse(evaluation.evaluationDate)) <= new Date(Date.parse(lastWeekLastDay.toISOString()))))          
-          // || ((dateRange === "lastWeek") && (parseDate(evaluation.evaluationDate).compare(parseDate(lastWeekFirstDay.toISOString().split('T')[0])) >= 0) && (parseDate(evaluation.evaluationDate).compare(parseDate(lastWeekLastDay.toISOString().split('T')[0])) < 0))
+          || ((dateRange === "lastWeek") && (new Date(Date.parse(evaluation.evaluationDate)) >= new Date(Date.parse(lastWeekFirstDay.toISOString()))) && (new Date(Date.parse(evaluation.evaluationDate)) <= new Date(Date.parse(lastWeekLastDay.toISOString()))))                    
           || ((dateRange === "thisMonth") && (getMonthRange(1).some(([month, year]) => month === evalMonth && year === evalYear)))
           || ((dateRange === "lastThreeMonths") && (getMonthRange(3).some(([month, year]) => month === evalMonth && year === evalYear)))
           || ((dateRange === "lastSixMonths") && (getMonthRange(6).some(([month, year]) => month === evalMonth && year === evalYear)))
           || ((dateRange === "lastTwelveMonths") && (getMonthRange(12).some(([month, year]) => month === evalMonth && year === evalYear)));
-        }
+        }        
       );
+      setPage(1);
     }
       return _filteredEvaluations;
     }, [evaluations, filterValue, statusFilter, dateRange, selectedEvaluation]);
@@ -616,6 +636,8 @@ export default function EvaluationsPage() {
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="15">15</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
               </select>
             </label>
           </div>
@@ -662,7 +684,7 @@ export default function EvaluationsPage() {
     }, [selectedKeys, sortedItems.length, page, pages, hasSearchFilter]);
 
     let evaluationCardData = selectedKeys !== "all" && selectedKeys.size === 0 ? null : evaluations.filter((evals) => Array.from(selectedKeys)[0] === evals.id)[0];
-    
+
     return (
       <div className="container flex justify-between gap-6">
          <div className="container flex flex-col w-auto justify-between ">
@@ -670,7 +692,20 @@ export default function EvaluationsPage() {
                 aria-label="Date (Controlled)"
                 value={selectedDate}
                 onChange={setSelectedDate}
-                className="w-full"
+                // classNames={{
+                //   // changes the background cell color to red if the date is 15
+                //     // cell: clsx("",{
+                //     //   "text-white data-[outside-month]:bg-red-500": true,
+                //     // })
+                //     cell: "text-white data-[outside-month]:bg-red-500",
+                //   }
+
+
+                  // cell: clsx("bg-primary-500 text-white", {
+                  //   "bg-danger-600": ,
+                  // }),
+                // }
+                
               />
               <Card className="max-w-[400px] grow">
               <CardHeader className="flex gap-3">

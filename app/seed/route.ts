@@ -2,8 +2,9 @@
 import bcrypt from "bcrypt";
 import { db } from "@vercel/postgres";
 import { NextResponse } from "next/server";
-
+import { writeEvaluationsToJsonFile } from "../../util/write_mock_to_file";
 import { users, subjects, classes, evaluations } from "../../types/seed-data";
+import { Evaluation } from "@/types";
 
 const client = await db.connect();
 
@@ -129,8 +130,16 @@ async function seedEvaluations() {
   return insertedEvaluations;
 }
 
+export function loadEvaluationsFromFile() : Evaluation[] {
+  const evaluations: Evaluation[] = require("../../evaluations.json");
+  evaluations.forEach((element) => {
+    console.log(element);
+  });
+  return evaluations;
+} 
 export async function GET() {
-
+  writeEvaluationsToJsonFile();
+  // loadEvaluationsFromFile();
   try {
     await client.sql`BEGIN`;
     let createdUsers = await seedUsers();
