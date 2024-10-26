@@ -115,6 +115,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "complete",
     evaluationDate: '2022-12-12',
+    evaluationTime: "9:05",
     evaluationNotes: "Great teacher, very patient with students. Great teacher, very patient with students.Great teacher, very patient with students.Great teacher, very patient with students.Great teacher, very patient with students.Great teacher, very patient with students.",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -128,6 +129,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "pending",
     evaluationDate: '2022-12-12',
+    evaluationTime: "9:05",
     evaluationNotes: "Bit Immature.",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -141,6 +143,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "scheduled",
     evaluationDate: '2023-12-12',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -154,6 +157,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "scheduled",
     evaluationDate: '2021-12-12',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -167,6 +171,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "pending",
     evaluationDate: '2024-12-12',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -180,6 +185,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "complete",
     evaluationDate: '2022-12-12',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -193,6 +199,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "complete",
     evaluationDate: '2022-12-12',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -206,6 +213,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "scheduled",
     evaluationDate: '2022-12-12',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -219,6 +227,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "pending",
     evaluationDate: '2022-12-12',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -232,6 +241,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "complete",
     evaluationDate: '2024-10-20',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -245,6 +255,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "complete",
     evaluationDate: '2024-10-26',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -258,6 +269,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "complete",
     evaluationDate: '2024-10-23',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -271,6 +283,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "complete",
     evaluationDate: '2024-10-27',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -284,6 +297,7 @@ const evaluationsListStatic: Evaluation[] = [
     evaluatorName: "Nick Fury",
     status: "complete",
     evaluationDate: '2024-10-17',
+    evaluationTime: "9:05",
     evaluationNotes: "Teacher keeps dodging my calls...",
     createdAt: '2022-12-12',
     updatedAt: '2022-12-12',
@@ -300,18 +314,22 @@ function readEvaluationFromObject(data: any): Evaluation {
     evaluatorName: data.evaluatorName,
     status: data.status,
     evaluationDate: data.evaluationDate,
+    evaluationTime: data.evaluationTime,
     evaluationNotes: data.evaluationNotes,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   };
 }
 
-
+const evalTime = "9:05:02 AM";
+const evalDate = "2022-12-12";
+const evalDateTime = new Date(`${evalDate} ${evalTime}`);
 
 const listCount = 1000;
 const evaluationsList : Evaluation[] = Object.keys(data).slice(0,listCount).map((k:any) => data[k] as Evaluation);
 
-const evaluations: Evaluation[] = evaluationsList.sort((a: Evaluation,b: Evaluation) => {return Date.parse(a.evaluationDate) < Date.parse(b.evaluationDate) ? 1 : -1;});
+// const evaluations: Evaluation[] = evaluationsList.sort((a: Evaluation,b: Evaluation) => {return Date.parse(a.evaluationDate) < Date.parse(b.evaluationDate) ? 1 : -1;});
+const evaluations: Evaluation[] = evaluationsList.sort((a: Evaluation,b: Evaluation) => {return new Date(`${a.evaluationDate} ${a.evaluationTime}`) < new Date(`${b.evaluationDate} ${b.evaluationTime}`) ? 1 : -1;});
 const DATE_RANGES = [
   {
     name: "All",
@@ -814,7 +832,7 @@ export default function EvaluationsPage() {
                     <div>
                       <div className="flex justify-between">
                         <p>Time</p>
-                        <p>8:00am</p>
+                        <p>{evaluationCardData?.evaluationTime}</p>
                       </div>
                       <Divider/>
                     </div>

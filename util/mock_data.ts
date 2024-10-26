@@ -135,6 +135,7 @@ export function generateListOfRandomEvaluations(count: number) : Evaluation[] {
             className: teacher.classes[Math.floor(Math.random() * teacher.classes.length)],
             evaluationNotes: lorem.generateSentences(Math.floor(Math.random() * 5) + 2),
             evaluationDate: evalDate,
+            evaluationTime: randomDate(new Date(evalDateObj.setHours(8)), new Date(evalDateObj.setHours(16))).toLocaleTimeString(),
             evaluatorName: "Nick Fury",
             status: status,
             createdAt: new Date().toISOString(),

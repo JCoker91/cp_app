@@ -46,6 +46,7 @@ export type Evaluation = {
   className: string;
   evaluationNotes: string;
   evaluationDate: string;
+  evaluationTime: string;
   evaluatorName: string;
   status: string;
   createdAt: string;
