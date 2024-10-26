@@ -4,8 +4,8 @@ import {Chip, ChipProps} from "@nextui-org/chip";
 import { Evaluation, readEvaluationsFromFile, generatedEvaluationList } from "@/types";
 import React from "react";
 import { title } from "@/components/primitives";
-import { Calendar} from "@nextui-org/calendar";
-// import {parseDate} from "@internationalized/date";
+import { Calendar, CalendarDate} from "@nextui-org/calendar";
+import {getLocalTimeZone, parseDate, today} from "@internationalized/date";
 import * as data from "../../../evaluations.json";
 import { Card, CardHeader, Selection, SortDescriptor, Image, Divider, CardBody, CardFooter, Link, Spacer, Avatar, cn } from "@nextui-org/react";
 import type {DateValue} from "@react-types/calendar";
@@ -323,9 +323,9 @@ function readEvaluationFromObject(data: any): Evaluation {
   };
 }
 
-const evalTime = "9:05:02 AM";
-const evalDate = "2022-12-12";
-const evalDateTime = new Date(`${evalDate} ${evalTime}`);
+// const evalTime = "9:05:02 AM";
+// const evalDate = "2022-12-12";
+// const evalDateTime = new Date(`${evalDate} ${evalTime}`);
 
 const listCount = 1000;
 const evaluationsList : Evaluation[] = Object.keys(data).slice(0,listCount).map((k:any) => data[k] as Evaluation);
@@ -416,7 +416,7 @@ export default function EvaluationsPage() {
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   // const [scheduledEvaluations, setScheduledEvaluations] = React.useState<Evaluation[]>([]);
-  const [selectedDate, setSelectedDate] = React.useState<DateValue>();
+  const [selectedDate, setSelectedDate] = React.useState<DateValue>(today(getLocalTimeZone()));
   const [selectedEvaluation, setSelectedEvaluation] = React.useState<Evaluation | null>(null);
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
     column: "evaluationDate",
@@ -489,9 +489,8 @@ export default function EvaluationsPage() {
 
     const scheduledEvaluations = React.useMemo(() => {
       let _filteredEvaluations = [...evaluations];
-      console.log("Selected Date: " + new Date(selectedDate?.day + " " + selectedDate?.month + " " + selectedDate?.year));
-      console.log("Eval List Date: " + new Date(Date.parse(_filteredEvaluations[0].evaluationDate)));
-      return [];// _filteredEvaluations.filter((evaluation) => new Date(Date.parse(evaluation.evaluationDate)) === selectedDate?.toDate(new Date().getTimezoneOffset().toLocaleString()));
+      let _selectedDate =  new Date(selectedDate == undefined ? 2024 :selectedDate.year, selectedDate == undefined ? 10 : selectedDate.month - 1, selectedDate?.day);      
+      return  _filteredEvaluations.filter((evaluation) => _selectedDate.getMonth() == new Date(Date.parse(evaluation.evaluationDate)).getMonth() && _selectedDate.getFullYear() == new Date(Date.parse(evaluation.evaluationDate)).getFullYear() && _selectedDate.getFullYear() == new Date(Date.parse(evaluation.evaluationDate)).getFullYear() && _selectedDate.getDate() == new Date(Date.parse(evaluation.evaluationDate)).getDate()).toReversed();
     }, [selectedDate]);
 
     const pages = Math.ceil(filteredItems.length / rowsPerPage);
@@ -750,13 +749,13 @@ export default function EvaluationsPage() {
                 </div>
               </CardHeader>
               <Divider/>
-              <CardBody className="justify-between overflow-y-scroll text-small max-h-[125px]">
+              <CardBody className="overflow-y-scroll text-small max-h-[125px]">
               {
                 scheduledEvaluations.map((evaluation) => (
                   
                   <div className="flex justify-between" key={evaluation.id}>
                     <p>{evaluation.primaryTeacherName}</p>
-                    <p>{evaluation.evaluationTime}</p>
+                    <p>{new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getHours() % 12 + ":" + new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getMinutes().toString().padStart(2,"0")}</p>
                   </div>
                   
                 ))
