@@ -56,7 +56,7 @@ const columns = [
 
 
 
-const scheduledEvaluations = [
+const scheduledEvaluationsL = [
   {
     date: "2024-10-17",
     teacher: "Natasha Romanoff",
@@ -304,6 +304,8 @@ const evaluationsListStatic: Evaluation[] = [
   },
 ];
 
+
+
 function readEvaluationFromObject(data: any): Evaluation {
   return {
     id: data.id,
@@ -413,6 +415,7 @@ export default function EvaluationsPage() {
   const [dateRange, setDateRange] = React.useState<string>("all");
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  // const [scheduledEvaluations, setScheduledEvaluations] = React.useState<Evaluation[]>([]);
   const [selectedDate, setSelectedDate] = React.useState<DateValue>();
   const [selectedEvaluation, setSelectedEvaluation] = React.useState<Evaluation | null>(null);
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
@@ -483,6 +486,13 @@ export default function EvaluationsPage() {
     }
       return _filteredEvaluations;
     }, [evaluations, filterValue, statusFilter, dateRange, selectedEvaluation]);
+
+    const scheduledEvaluations = React.useMemo(() => {
+      let _filteredEvaluations = [...evaluations];
+      console.log("Selected Date: " + new Date(selectedDate?.day + " " + selectedDate?.month + " " + selectedDate?.year));
+      console.log("Eval List Date: " + new Date(Date.parse(_filteredEvaluations[0].evaluationDate)));
+      return [];// _filteredEvaluations.filter((evaluation) => new Date(Date.parse(evaluation.evaluationDate)) === selectedDate?.toDate(new Date().getTimezoneOffset().toLocaleString()));
+    }, [selectedDate]);
 
     const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -744,9 +754,9 @@ export default function EvaluationsPage() {
               {
                 scheduledEvaluations.map((evaluation) => (
                   
-                  <div className="flex justify-between" key={evaluation.teacher}>
-                    <p>{evaluation.teacher}</p>
-                    <p>{evaluation.time}</p>
+                  <div className="flex justify-between" key={evaluation.id}>
+                    <p>{evaluation.primaryTeacherName}</p>
+                    <p>{evaluation.evaluationTime}</p>
                   </div>
                   
                 ))
