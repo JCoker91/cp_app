@@ -387,7 +387,7 @@ function getMonthRange(monthsBack: number) : [number,number][] {
   return monthRange;
 }
 
-function getWeekDateRange(week: string = "thisWeek"): [Date, Date] {
+function getWeekDateRange(week: string = "thisWeek"): [string, string] {
   
   
   const today = new Date();
@@ -400,9 +400,9 @@ function getWeekDateRange(week: string = "thisWeek"): [Date, Date] {
   const last = first + 6;
 
   today.setHours(0,0,0);
-  const firstDay = new Date(today.setDate(first));
+  const firstDay = new Date(today.setDate(first)).toString();
   today.setHours(23,59,0);
-  const lastDay = new Date(today.setDate(last));
+  const lastDay = new Date(today.setDate(last)).toString();
 
   return [firstDay, lastDay];
 }
@@ -469,13 +469,12 @@ export default function EvaluationsPage() {
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
 
-        
-
         _filteredEvaluations = _filteredEvaluations.filter((evaluation) => {
           const [evalMonth, evalYear] = getEvaluationMonthAndYear(evaluation.evaluationDate);
+
           return (dateRange === "all")
-          || ((dateRange === "thisWeek") && (new Date(Date.parse(evaluation.evaluationDate)) >= new Date(Date.parse(firstWeekFirstDay.toISOString()))) && (new Date(Date.parse(evaluation.evaluationDate)) <= new Date(Date.parse(firstWeekLastDay.toISOString()))))          
-          || ((dateRange === "lastWeek") && (new Date(Date.parse(evaluation.evaluationDate)) >= new Date(Date.parse(lastWeekFirstDay.toISOString()))) && (new Date(Date.parse(evaluation.evaluationDate)) <= new Date(Date.parse(lastWeekLastDay.toISOString()))))                    
+          || ((dateRange === "thisWeek") && (Date.parse(evaluation.evaluationDate) >= Date.parse(firstWeekFirstDay)) && (Date.parse(evaluation.evaluationDate) <= Date.parse(firstWeekLastDay)))          
+          || ((dateRange === "lastWeek") && (Date.parse(evaluation.evaluationDate) >= Date.parse(lastWeekFirstDay)) && (Date.parse(evaluation.evaluationDate) <= Date.parse(lastWeekLastDay)))                    
           || ((dateRange === "thisMonth") && (getMonthRange(1).some(([month, year]) => month === evalMonth && year === evalYear)))
           || ((dateRange === "lastThreeMonths") && (getMonthRange(3).some(([month, year]) => month === evalMonth && year === evalYear)))
           || ((dateRange === "lastSixMonths") && (getMonthRange(6).some(([month, year]) => month === evalMonth && year === evalYear)))
@@ -755,7 +754,7 @@ export default function EvaluationsPage() {
                   
                   <div className="flex justify-between" key={evaluation.id}>
                     <p>{evaluation.primaryTeacherName}</p>
-                    <p>{new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getHours() % 12 + ":" + new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getMinutes().toString().padStart(2,"0")}</p>
+                    <p>{(new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getHours() % 12 == 0 ? 12 : new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getHours() % 12) + ":" + new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getMinutes().toString().padStart(2,"0")}</p>
                   </div>
                   
                 ))
