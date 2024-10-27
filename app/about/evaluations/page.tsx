@@ -388,8 +388,6 @@ function getMonthRange(monthsBack: number) : [number,number][] {
 }
 
 function getWeekDateRange(week: string = "thisWeek"): [string, string] {
-  
-  
   const today = new Date();
 
   if (week === "lastWeek") {
@@ -483,7 +481,7 @@ export default function EvaluationsPage() {
       );
       setPage(1);
     }
-      return _filteredEvaluations;
+      return _filteredEvaluations.sort((a: Evaluation,b: Evaluation) => {return new Date(`${a.evaluationDate} ${a.evaluationTime}`) < new Date(`${b.evaluationDate} ${b.evaluationTime}`) ? 1 : -1;});
     }, [evaluations, filterValue, statusFilter, dateRange, selectedEvaluation]);
 
     const scheduledEvaluations = React.useMemo(() => {
@@ -718,6 +716,7 @@ export default function EvaluationsPage() {
                 aria-label="Date (Controlled)"
                 value={selectedDate}
                 onChange={setSelectedDate}
+                
                 // classNames={{
                 //   // changes the background cell color to red if the date is 15
                 //     // cell: clsx("",{
@@ -751,11 +750,14 @@ export default function EvaluationsPage() {
               <CardBody className="overflow-y-scroll text-small max-h-[125px]">
               {
                 scheduledEvaluations.map((evaluation) => (
-                  
-                  <div className="flex justify-between" key={evaluation.id}>
-                    <p>{evaluation.primaryTeacherName}</p>
-                    <p>{(new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getHours() % 12 == 0 ? 12 : new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getHours() % 12) + ":" + new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getMinutes().toString().padStart(2,"0")}</p>
-                  </div>
+                  <Button
+                    variant="light"
+                    className="flex justify-between"
+                    onDoubleClick={() => alert(evaluation.primaryTeacherName)}
+                    key={evaluation.id}>
+                      <p>{evaluation.primaryTeacherName}</p>
+                      <p>{(new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getHours() % 12 == 0 ? 12 : new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getHours() % 12) + ":" + new Date(evaluation.evaluationDate + " " + evaluation.evaluationTime).getMinutes().toString().padStart(2,"0")}</p>                    
+                  </Button>
                   
                 ))
               }
@@ -766,16 +768,12 @@ export default function EvaluationsPage() {
               >
               <Button
                 color="primary"
-                
               >
                 Schedule Evaluation
               </Button>
               </CardFooter>
             </Card>
          </div>
-        {/* <Spacer
-          x={24}
-        /> */}
         <Table
           aria-label="Example table with custom cells, pagination and sorting"
           isHeaderSticky={true}
@@ -796,8 +794,6 @@ export default function EvaluationsPage() {
           topContent={topContent}
           topContentPlacement="outside"
           onSortChange={setSortDescriptor}
-          // isCompact={true}
-          // removeWrapper={true}
         >
           <TableHeader columns={headerColumns}>
             {(column) => (
@@ -813,7 +809,8 @@ export default function EvaluationsPage() {
           <TableBody emptyContent={"No evaluations found"} items={sortedItems}>
             {(item) => (
               <TableRow key={item.id}>
-                {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+                {(columnKey) => <TableCell
+                  >{renderCell(item, columnKey)}</TableCell>}
               </TableRow>
             )}
           </TableBody>
@@ -830,35 +827,26 @@ export default function EvaluationsPage() {
               </CardHeader>
               <Divider/>
               <CardBody className=" px-4 gap-2">
-                    <div>
                       <div className="flex justify-between">
                         <p>Date</p>
                         <p>{evaluationCardData?.evaluationDate}</p>
                       </div>
                       <Divider/>
-                    </div>
-                    <div>
                       <div className="flex justify-between">
                         <p>Time</p>
                         <p>{evaluationCardData?.evaluationTime}</p>
                       </div>
                       <Divider/>
-                    </div>
-                    <div>
                       <div className="flex justify-between">
                         <p>Class</p>
                         <p>{evaluationCardData?.className}</p>
                       </div>
                       <Divider/>
-                    </div>
-                    <div>
                     <div className="flex justify-between">
                       <p>Evaluator</p>
                       <p>{evaluationCardData?.evaluatorName}</p>
                     </div>
                     <Divider/>
-                    </div>
-                    <div>
                       <div className="flex justify-between">
                         <p>Status</p>
                         <Chip className="capitalize" color={statusColorMap[evaluationCardData?.status ? evaluationCardData?.status : 1]} size="sm" variant="flat">
@@ -866,7 +854,6 @@ export default function EvaluationsPage() {
                         </Chip>
                       </div>
                     <Divider/>
-                    </div>
                     <div>
                       <div className="flex justify-center">
                         <p className="text-center">Notes</p>
