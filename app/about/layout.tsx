@@ -4,9 +4,9 @@ import { NavLinks } from "@/components/nav_links";
 import {User} from "@nextui-org/user";
 import { Link } from "@nextui-org/link";
 import NextLink from "next/link";
-import clsx from "clsx";
-import { link as linkStyles } from "@nextui-org/theme";
-import { Avatar } from "@nextui-org/react";
+// import clsx from "clsx";
+// import { link as linkStyles } from "@nextui-org/theme";
+// import { Avatar } from "@nextui-org/react";
 import { ThemeSwitch } from "@/components/theme-switch";
 
 export default function AboutLayout({
@@ -49,7 +49,7 @@ export default function AboutLayout({
       </NavbarContent>
     </Navbar>
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <div className="ontainer mx-auto max-w-7xl pt-4 px-4 flex-grow">
+      <div className="container mx-auto max-w-7xl pt-4 px-4 ">
         {children}
       </div>
     </section>

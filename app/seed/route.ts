@@ -130,13 +130,13 @@ async function seedEvaluations() {
   return insertedEvaluations;
 }
 
-export function loadEvaluationsFromFile() : Evaluation[] {
-  const evaluations: Evaluation[] = require("../../evaluations.json");
-  evaluations.forEach((element) => {
-    console.log(element);
-  });
-  return evaluations;
-} 
+// export function loadEvaluationsFromFile() : Evaluation[] {
+//   const evaluations: Evaluation[] = require("../../evaluations.json");
+//   evaluations.forEach((element) => {
+//     console.log(element);
+//   });
+//   return evaluations;
+// } 
 export async function GET() {
   writeEvaluationsToJsonFile();
   // loadEvaluationsFromFile();
