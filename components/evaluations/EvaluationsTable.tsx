@@ -98,20 +98,18 @@ const DATE_RANGES = [
   }
   
   function getWeekDateRange(week: string = "thisWeek"): [string, string] {
-    const today = new Date();
+    const dateRef = new Date();
   
     if (week === "lastWeek") {
-        today.setDate(today.getDate() - 7);
+        dateRef.setDate(dateRef.getDate() - 7);
     }
   
-    const first = today.getDate() - today.getDay();
-    const last = first + 6;
   
-    today.setHours(0,0,0);
-    const firstDay = new Date(today.setDate(first)).toString();
-    today.setHours(23,59,0);
-    const lastDay = new Date(today.setDate(last)).toString();
+    dateRef.setHours(0,0,0);
+    const firstDay = new Date(dateRef.setDate(dateRef.getDate() - dateRef.getDay())).toString();
   
+    dateRef.setHours(23,59,0);
+    const lastDay = new Date(dateRef.setDate(dateRef.getDate() + 6)).toString();
     return [firstDay, lastDay];
   }
 
@@ -275,7 +273,6 @@ export default function EvaluationsTable(
 
 
       const sortedItems = React.useMemo(() => {
-        console.log(selectedKeys);
         return [...items].sort((a: Evaluation, b: Evaluation) => {
           const first = a[sortDescriptor.column as keyof Evaluation];
           const second = b[sortDescriptor.column as keyof Evaluation];
