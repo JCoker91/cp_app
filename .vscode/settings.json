@@ -1,4 +1,10 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "jira-plugin.workingProject": ""
+  "jira-plugin.workingProject": "",
+  "workbench.editor.customLabels.patterns": {
+    "**/routes/**/+page.svelte": "${dirname(1)}/${dirname}",
+    "**/routes/**/+page.server.ts": "/${dirname} [server]",
+    "**/app/**/page.tsx": "${dirname}.${extname}",
+    "**/app/**/layout.tsx": "${dirname}/layout.${extname}"
+  }
 }
